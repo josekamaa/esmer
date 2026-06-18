@@ -2,10 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Esmer Cyber Solutions</title>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Esmer Cyber Solutions – Your Digital Hub</title>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet" />
   <style>
+    /* ── ROOT ── */
     :root {
       --teal: #00c9a7;
       --teal-dark: #009e85;
@@ -15,21 +17,31 @@
       --white: #f5f9ff;
       --muted: #7a92b2;
       --accent: #ff6b35;
-      --card-bg: rgba(26,47,78,0.7);
+      --card-bg: rgba(26, 47, 78, 0.65);
+      --border: rgba(255, 255, 255, 0.08);
     }
 
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-    html { scroll-behavior: smooth; }
+    html {
+      scroll-behavior: smooth;
+    }
 
     body {
       font-family: 'DM Sans', sans-serif;
       background: var(--navy);
       color: var(--white);
       overflow-x: hidden;
+      padding-top: 36px; /* space for status bar */
     }
 
-    /* ── NOISE TEXTURE OVERLAY ── */
+    /* ── NOISE OVERLAY ── */
     body::before {
       content: '';
       position: fixed;
@@ -37,21 +49,55 @@
       background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
       pointer-events: none;
       z-index: 0;
-      opacity: 0.4;
+      opacity: 0.3;
+    }
+
+    /* ── LIVE STATUS BAR ── */
+    #status-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 200;
+      padding: 0.5rem 5%;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-align: center;
+      letter-spacing: 0.02em;
+      backdrop-filter: blur(8px);
+      transition: background 0.4s, transform 0.3s;
+      transform: translateY(-100%);
+      opacity: 0;
+    }
+    #status-bar.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    #status-bar.open-bar {
+      background: rgba(0, 201, 167, 0.92);
+      color: var(--navy);
+    }
+    #status-bar.closed-bar {
+      background: rgba(224, 82, 82, 0.92);
+      color: #fff;
     }
 
     /* ── NAV ── */
     nav {
       position: fixed;
-      top: 0; left: 0; right: 0;
+      top: 0;
+      left: 0;
+      right: 0;
       z-index: 100;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 1.1rem 5%;
-      background: rgba(10,22,40,0.85);
-      backdrop-filter: blur(14px);
-      border-bottom: 1px solid rgba(0,201,167,0.12);
+      padding: 0.8rem 5%;
+      background: rgba(10, 22, 40, 0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      transition: top 0.3s;
+      margin-top: 36px; /* status bar height */
     }
 
     .logo {
@@ -62,36 +108,57 @@
       color: var(--white);
       text-decoration: none;
     }
-
-    .logo span { color: var(--teal); }
+    .logo span {
+      color: var(--teal);
+    }
 
     nav ul {
       list-style: none;
       display: flex;
-      gap: 2.2rem;
+      gap: 2rem;
+      align-items: center;
     }
-
     nav ul a {
       text-decoration: none;
       color: var(--muted);
-      font-size: 0.88rem;
+      font-size: 0.85rem;
       font-weight: 500;
-      letter-spacing: 0.03em;
-      transition: color .2s;
+      transition: color 0.2s;
+      position: relative;
     }
-
-    nav ul a:hover { color: var(--teal); }
+    nav ul a::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: -4px;
+      width: 0;
+      height: 2px;
+      background: var(--teal);
+      transition: width 0.25s;
+    }
+    nav ul a:hover {
+      color: var(--white);
+    }
+    nav ul a:hover::after {
+      width: 100%;
+    }
 
     .nav-cta {
       background: var(--teal);
       color: var(--navy) !important;
-      padding: .45rem 1.1rem;
-      border-radius: 6px;
+      padding: 0.4rem 1.2rem;
+      border-radius: 30px;
       font-weight: 700 !important;
-      transition: background .2s !important;
+      transition: background 0.2s, transform 0.2s !important;
     }
-
-    .nav-cta:hover { background: var(--teal-dark) !important; color: var(--white) !important; }
+    .nav-cta::after {
+      display: none !important;
+    }
+    .nav-cta:hover {
+      background: var(--teal-dark) !important;
+      color: var(--white) !important;
+      transform: translateY(-2px);
+    }
 
     /* ── HERO ── */
     #hero {
@@ -99,72 +166,93 @@
       display: flex;
       align-items: center;
       position: relative;
-      padding: 8rem 5% 5rem;
+      padding: 10rem 5% 5rem;
       overflow: hidden;
     }
 
     .hero-glow {
       position: absolute;
-      width: 600px; height: 600px;
+      width: 600px;
+      height: 600px;
       border-radius: 50%;
-      background: radial-gradient(circle, rgba(0,201,167,0.18) 0%, transparent 70%);
-      top: -100px; right: -100px;
+      background: radial-gradient(circle, rgba(0, 201, 167, 0.18) 0%, transparent 70%);
+      top: -100px;
+      right: -100px;
       pointer-events: none;
       animation: pulse 6s ease-in-out infinite;
     }
-
     .hero-glow-2 {
       position: absolute;
-      width: 400px; height: 400px;
+      width: 400px;
+      height: 400px;
       border-radius: 50%;
-      background: radial-gradient(circle, rgba(255,107,53,0.1) 0%, transparent 70%);
-      bottom: 50px; left: -80px;
+      background: radial-gradient(circle, rgba(255, 107, 53, 0.1) 0%, transparent 70%);
+      bottom: 50px;
+      left: -80px;
       pointer-events: none;
       animation: pulse 8s ease-in-out infinite reverse;
     }
 
     @keyframes pulse {
-      0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.08); opacity: 0.7; }
+      0%,
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+      50% {
+        transform: scale(1.08);
+        opacity: 0.7;
+      }
     }
 
     .hero-inner {
       max-width: 680px;
       position: relative;
       z-index: 1;
-      animation: fadeUp .9s ease both;
+      animation: fadeUp 0.9s ease both;
     }
 
     @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(30px); }
-      to   { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .hero-badge {
       display: inline-flex;
       align-items: center;
-      gap: .5rem;
-      background: rgba(0,201,167,0.12);
-      border: 1px solid rgba(0,201,167,0.3);
-      border-radius: 20px;
-      padding: .35rem 1rem;
-      font-size: .8rem;
+      gap: 0.5rem;
+      background: rgba(0, 201, 167, 0.12);
+      border: 1px solid rgba(0, 201, 167, 0.3);
+      border-radius: 30px;
+      padding: 0.35rem 1.2rem;
+      font-size: 0.8rem;
       color: var(--teal);
       font-weight: 600;
-      letter-spacing: .05em;
+      letter-spacing: 0.05em;
       margin-bottom: 1.5rem;
     }
-
     .hero-badge::before {
       content: '';
-      width: 7px; height: 7px;
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
       background: var(--teal);
       animation: blink 1.4s infinite;
     }
-
     @keyframes blink {
-      0%, 100% { opacity: 1; } 50% { opacity: 0.2; }
+      0%,
+      100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.2;
+      }
     }
 
     h1 {
@@ -175,18 +263,18 @@
       letter-spacing: -0.03em;
       margin-bottom: 1.3rem;
     }
-
     h1 .highlight {
       color: var(--teal);
       position: relative;
       display: inline-block;
     }
-
     h1 .highlight::after {
       content: '';
       position: absolute;
-      left: 0; bottom: -4px;
-      width: 100%; height: 3px;
+      left: 0;
+      bottom: -4px;
+      width: 100%;
+      height: 3px;
       background: linear-gradient(90deg, var(--teal), transparent);
       border-radius: 2px;
     }
@@ -209,72 +297,73 @@
       background: var(--teal);
       color: var(--navy);
       border: none;
-      padding: .85rem 2rem;
-      border-radius: 8px;
+      padding: 0.85rem 2.2rem;
+      border-radius: 40px;
       font-family: 'Syne', sans-serif;
       font-weight: 700;
-      font-size: .95rem;
+      font-size: 0.95rem;
       cursor: pointer;
       text-decoration: none;
-      transition: transform .2s, box-shadow .2s;
-      box-shadow: 0 4px 24px rgba(0,201,167,0.3);
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 24px rgba(0, 201, 167, 0.3);
     }
-
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,201,167,0.45); }
-
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 36px rgba(0, 201, 167, 0.5);
+    }
     .btn-outline {
       background: transparent;
       color: var(--white);
-      border: 1.5px solid rgba(255,255,255,0.2);
-      padding: .85rem 2rem;
-      border-radius: 8px;
+      border: 1.5px solid rgba(255, 255, 255, 0.2);
+      padding: 0.85rem 2rem;
+      border-radius: 40px;
       font-family: 'Syne', sans-serif;
       font-weight: 600;
-      font-size: .95rem;
+      font-size: 0.95rem;
       cursor: pointer;
       text-decoration: none;
-      transition: border-color .2s, color .2s;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .btn-outline:hover {
+      border-color: var(--teal);
+      color: var(--teal);
     }
 
-    .btn-outline:hover { border-color: var(--teal); color: var(--teal); }
-
-    /* ── FLOATING STATS ── */
     .hero-stats {
       display: flex;
       gap: 2.5rem;
       margin-top: 3.5rem;
       padding-top: 2.5rem;
-      border-top: 1px solid rgba(255,255,255,0.07);
-      animation: fadeUp 1.1s ease .3s both;
+      border-top: 1px solid rgba(255, 255, 255, 0.07);
     }
-
-    .stat-item { }
-
     .stat-num {
       font-family: 'Syne', sans-serif;
       font-size: 2rem;
       font-weight: 800;
       color: var(--teal);
     }
-
     .stat-label {
-      font-size: .78rem;
+      font-size: 0.78rem;
       color: var(--muted);
-      letter-spacing: .04em;
-      margin-top: .15rem;
+      letter-spacing: 0.04em;
+      margin-top: 0.15rem;
     }
 
     /* ── SECTION BASE ── */
-    section { padding: 5.5rem 5%; position: relative; z-index: 1; }
+    section {
+      padding: 5.5rem 5%;
+      position: relative;
+      z-index: 1;
+    }
 
     .section-tag {
       display: inline-block;
-      font-size: .75rem;
+      font-size: 0.75rem;
       font-weight: 700;
-      letter-spacing: .12em;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
       color: var(--teal);
-      margin-bottom: .8rem;
+      margin-bottom: 0.8rem;
     }
 
     h2 {
@@ -285,7 +374,6 @@
       line-height: 1.1;
       margin-bottom: 1rem;
     }
-
     .section-sub {
       color: var(--muted);
       font-size: 1rem;
@@ -295,255 +383,259 @@
     }
 
     /* ── SERVICES ── */
-    #services { background: var(--navy-mid); }
-
-    .services-header { text-align: center; }
-    .services-header .section-sub { margin: 0 auto 3rem; }
+    #services {
+      background: var(--navy-mid);
+    }
+    .services-header {
+      text-align: center;
+    }
+    .services-header .section-sub {
+      margin: 0 auto 3rem;
+    }
 
     .services-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
       gap: 1.5rem;
     }
-
     .service-card {
       background: var(--card-bg);
-      border: 1px solid rgba(255,255,255,0.07);
-      border-radius: 14px;
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--border);
+      border-radius: 16px;
       padding: 2rem 1.7rem;
-      transition: transform .25s, border-color .25s, box-shadow .25s;
+      transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;
       position: relative;
       overflow: hidden;
       cursor: default;
     }
-
     .service-card::before {
       content: '';
       position: absolute;
       inset: 0;
-      background: linear-gradient(135deg, rgba(0,201,167,0.06) 0%, transparent 60%);
+      background: linear-gradient(135deg, rgba(0, 201, 167, 0.06) 0%, transparent 60%);
       opacity: 0;
-      transition: opacity .3s;
+      transition: opacity 0.3s;
     }
-
-    .service-card:hover { transform: translateY(-5px); border-color: rgba(0,201,167,0.3); box-shadow: 0 12px 40px rgba(0,0,0,0.3); }
-    .service-card:hover::before { opacity: 1; }
-
+    .service-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(0, 201, 167, 0.3);
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+    }
+    .service-card:hover::before {
+      opacity: 1;
+    }
     .service-icon {
-      width: 48px; height: 48px;
-      border-radius: 10px;
-      background: rgba(0,201,167,0.12);
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      background: rgba(0, 201, 167, 0.12);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.5rem;
+      font-size: 1.6rem;
       margin-bottom: 1.2rem;
-      border: 1px solid rgba(0,201,167,0.2);
+      border: 1px solid rgba(0, 201, 167, 0.2);
     }
-
     .service-card h3 {
       font-family: 'Syne', sans-serif;
       font-size: 1.05rem;
       font-weight: 700;
-      margin-bottom: .5rem;
+      margin-bottom: 0.5rem;
     }
-
     .service-card p {
       color: var(--muted);
-      font-size: .87rem;
+      font-size: 0.87rem;
       line-height: 1.6;
     }
 
-    /* ── MKOPA PHONES ── */
+    /* ── MKOPA ── */
     #phones {
       background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
     }
-
     .phones-layout {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 4rem;
       align-items: center;
     }
-
-    .phones-text h2 { margin-bottom: .8rem; }
-
     .mkopa-badge {
       display: inline-flex;
       align-items: center;
-      gap: .4rem;
-      background: rgba(255,107,53,0.12);
-      border: 1px solid rgba(255,107,53,0.3);
-      border-radius: 20px;
-      padding: .3rem .9rem;
-      font-size: .78rem;
+      gap: 0.4rem;
+      background: rgba(255, 107, 53, 0.12);
+      border: 1px solid rgba(255, 107, 53, 0.3);
+      border-radius: 30px;
+      padding: 0.3rem 0.9rem;
+      font-size: 0.78rem;
       color: var(--accent);
       font-weight: 700;
-      letter-spacing: .06em;
+      letter-spacing: 0.06em;
       margin-bottom: 1rem;
     }
-
     .phones-features {
       list-style: none;
       margin: 1.5rem 0 2rem;
     }
-
     .phones-features li {
       display: flex;
       align-items: center;
-      gap: .7rem;
-      padding: .6rem 0;
+      gap: 0.7rem;
+      padding: 0.6rem 0;
       color: var(--muted);
-      font-size: .9rem;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
+      font-size: 0.9rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     }
-
     .phones-features li::before {
       content: '✓';
-      width: 22px; height: 22px;
+      width: 24px;
+      height: 24px;
       border-radius: 50%;
-      background: rgba(0,201,167,0.15);
+      background: rgba(0, 201, 167, 0.15);
       color: var(--teal);
-      font-size: .75rem;
+      font-size: 0.75rem;
       font-weight: 700;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
     }
-
     .phones-cards {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 1rem;
     }
-
     .phone-card {
       background: var(--card-bg);
-      border: 1px solid rgba(255,255,255,0.07);
-      border-radius: 12px;
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--border);
+      border-radius: 14px;
       padding: 1.5rem;
-      transition: transform .2s, border-color .2s;
+      transition: transform 0.2s, border-color 0.2s;
     }
-
-    .phone-card:hover { transform: translateY(-4px); border-color: rgba(255,107,53,0.3); }
-
-    .phone-card .phone-emoji { font-size: 2.2rem; margin-bottom: .8rem; display: block; }
-
+    .phone-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(255, 107, 53, 0.3);
+    }
+    .phone-card .phone-emoji {
+      font-size: 2.2rem;
+      margin-bottom: 0.8rem;
+      display: block;
+    }
     .phone-card h4 {
       font-family: 'Syne', sans-serif;
       font-weight: 700;
-      font-size: .95rem;
-      margin-bottom: .3rem;
+      font-size: 0.95rem;
+      margin-bottom: 0.3rem;
     }
-
     .phone-card .price {
       color: var(--accent);
       font-weight: 700;
-      font-size: .88rem;
+      font-size: 0.9rem;
     }
-
     .phone-card .price-sub {
       color: var(--muted);
-      font-size: .75rem;
+      font-size: 0.75rem;
     }
 
-    /* ── ONLINE SERVICES ── */
-    #online { background: var(--navy-mid); }
-
+    /* ── ONLINE ── */
+    #online {
+      background: var(--navy-mid);
+    }
     .online-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 1.2rem;
     }
-
     .online-card {
       background: var(--card-bg);
-      border: 1px solid rgba(255,255,255,0.07);
-      border-radius: 12px;
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--border);
+      border-radius: 14px;
       padding: 1.8rem 1.5rem;
       display: flex;
       align-items: flex-start;
       gap: 1rem;
-      transition: transform .2s, border-color .2s;
+      transition: transform 0.2s, border-color 0.2s;
     }
-
-    .online-card:hover { transform: translateY(-4px); border-color: rgba(0,201,167,0.25); }
-
+    .online-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(0, 201, 167, 0.25);
+    }
     .online-icon {
       font-size: 1.8rem;
       flex-shrink: 0;
       line-height: 1;
     }
-
     .online-card h4 {
       font-family: 'Syne', sans-serif;
       font-weight: 700;
-      font-size: .95rem;
-      margin-bottom: .3rem;
+      font-size: 0.95rem;
+      margin-bottom: 0.3rem;
     }
-
     .online-card p {
       color: var(--muted);
-      font-size: .82rem;
+      font-size: 0.82rem;
       line-height: 1.5;
     }
 
     /* ── WHY US ── */
-    #why { background: var(--navy); }
-
+    #why {
+      background: var(--navy);
+    }
     .why-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 4rem;
       align-items: center;
     }
-
-    .why-points { display: flex; flex-direction: column; gap: 1.5rem; }
-
+    .why-points {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
     .why-point {
       display: flex;
       gap: 1.2rem;
       align-items: flex-start;
     }
-
     .why-num {
       font-family: 'Syne', sans-serif;
       font-weight: 800;
       font-size: 2.5rem;
-      color: rgba(0,201,167,0.18);
+      color: rgba(0, 201, 167, 0.18);
       line-height: 1;
       flex-shrink: 0;
       width: 3rem;
     }
-
     .why-point h4 {
       font-family: 'Syne', sans-serif;
       font-weight: 700;
       font-size: 1rem;
-      margin-bottom: .3rem;
+      margin-bottom: 0.3rem;
     }
-
-    .why-point p { color: var(--muted); font-size: .87rem; line-height: 1.6; }
-
+    .why-point p {
+      color: var(--muted);
+      font-size: 0.87rem;
+      line-height: 1.6;
+    }
     .why-visual {
       background: var(--card-bg);
-      border: 1px solid rgba(255,255,255,0.07);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--border);
       border-radius: 20px;
       padding: 2.5rem;
       position: relative;
       overflow: hidden;
     }
-
     .why-visual::before {
       content: '';
       position: absolute;
       inset: -1px;
       border-radius: 20px;
-      background: linear-gradient(135deg, rgba(0,201,167,0.2), transparent 50%);
+      background: linear-gradient(135deg, rgba(0, 201, 167, 0.2), transparent 50%);
       pointer-events: none;
     }
-
     .why-visual-title {
       font-family: 'Syne', sans-serif;
       font-weight: 800;
@@ -551,160 +643,267 @@
       margin-bottom: 1.5rem;
       color: var(--teal);
     }
-
-    .hours-list { list-style: none; }
-
+    .hours-list {
+      list-style: none;
+    }
     .hours-list li {
       display: flex;
       justify-content: space-between;
-      padding: .65rem 0;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-      font-size: .88rem;
+      padding: 0.65rem 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 0.88rem;
       color: var(--muted);
     }
-
-    .hours-list li .day { color: var(--white); font-weight: 500; }
-    .hours-list li .time { color: var(--teal); }
-
+    .hours-list li .day {
+      color: var(--white);
+      font-weight: 500;
+    }
+    .hours-list li .time {
+      color: var(--teal);
+    }
     .location-block {
       margin-top: 1.8rem;
       padding-top: 1.5rem;
-      border-top: 1px solid rgba(255,255,255,0.07);
+      border-top: 1px solid rgba(255, 255, 255, 0.07);
     }
-
     .location-block h5 {
       font-family: 'Syne', sans-serif;
       font-weight: 700;
-      font-size: .85rem;
-      letter-spacing: .06em;
+      font-size: 0.85rem;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
       color: var(--muted);
-      margin-bottom: .6rem;
+      margin-bottom: 0.6rem;
+    }
+    .location-block p {
+      color: var(--white);
+      font-size: 0.9rem;
+      line-height: 1.5;
     }
 
-    .location-block p { color: var(--white); font-size: .9rem; line-height: 1.5; }
-
     /* ── CONTACT ── */
-    #contact { background: var(--navy-mid); }
-
+    #contact {
+      background: var(--navy-mid);
+    }
     .contact-grid {
       display: grid;
       grid-template-columns: 1fr 1.2fr;
       gap: 4rem;
       align-items: start;
     }
-
-    .contact-info h2 { margin-bottom: .8rem; }
-
     .contact-links {
       margin-top: 2rem;
       display: flex;
       flex-direction: column;
-      gap: .8rem;
+      gap: 0.8rem;
     }
-
     .contact-link {
       display: flex;
       align-items: center;
       gap: 1rem;
       padding: 1rem 1.2rem;
       background: var(--card-bg);
-      border: 1px solid rgba(255,255,255,0.07);
-      border-radius: 10px;
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--border);
+      border-radius: 12px;
       text-decoration: none;
       color: var(--white);
-      transition: border-color .2s, transform .2s;
+      transition: border-color 0.2s, transform 0.2s;
     }
-
-    .contact-link:hover { border-color: var(--teal); transform: translateX(4px); }
-
+    .contact-link:hover {
+      border-color: var(--teal);
+      transform: translateX(6px);
+    }
     .contact-link .cl-icon {
-      width: 38px; height: 38px;
-      border-radius: 8px;
-      background: rgba(0,201,167,0.12);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.1rem;
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      background: rgba(0, 201, 167, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
       flex-shrink: 0;
     }
-
-    .contact-link .cl-label { font-size: .75rem; color: var(--muted); }
-    .contact-link .cl-val { font-size: .9rem; font-weight: 500; }
-
+    .contact-link .cl-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+    .contact-link .cl-val {
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
     .contact-form {
       background: var(--card-bg);
-      border: 1px solid rgba(255,255,255,0.07);
-      border-radius: 16px;
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--border);
+      border-radius: 18px;
       padding: 2.2rem;
     }
-
     .contact-form h3 {
       font-family: 'Syne', sans-serif;
       font-weight: 700;
       font-size: 1.1rem;
       margin-bottom: 1.5rem;
     }
-
-    .form-group { margin-bottom: 1.1rem; }
-
+    .form-group {
+      margin-bottom: 1.1rem;
+    }
     .form-group label {
       display: block;
-      font-size: .8rem;
+      font-size: 0.8rem;
       color: var(--muted);
       font-weight: 500;
-      margin-bottom: .4rem;
-      letter-spacing: .03em;
+      margin-bottom: 0.4rem;
+      letter-spacing: 0.03em;
     }
-
     .form-group input,
     .form-group select,
     .form-group textarea {
       width: 100%;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 8px;
-      padding: .75rem 1rem;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
       color: var(--white);
       font-family: 'DM Sans', sans-serif;
-      font-size: .9rem;
+      font-size: 0.9rem;
       outline: none;
-      transition: border-color .2s;
+      transition: border-color 0.2s, box-shadow 0.2s;
       resize: vertical;
     }
-
     .form-group input:focus,
     .form-group select:focus,
     .form-group textarea:focus {
       border-color: var(--teal);
+      box-shadow: 0 0 0 3px rgba(0, 201, 167, 0.15);
     }
-
-    .form-group select option { background: var(--navy-mid); }
-
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-
+    .form-group select option {
+      background: var(--navy-mid);
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
     .btn-submit {
       width: 100%;
       background: var(--teal);
       color: var(--navy);
       border: none;
-      padding: .9rem;
-      border-radius: 8px;
+      padding: 0.9rem;
+      border-radius: 12px;
       font-family: 'Syne', sans-serif;
       font-weight: 700;
-      font-size: .95rem;
+      font-size: 0.95rem;
       cursor: pointer;
-      transition: background .2s, transform .2s;
-      margin-top: .5rem;
+      transition: background 0.2s, transform 0.2s;
+      margin-top: 0.5rem;
+    }
+    .btn-submit:hover {
+      background: var(--teal-dark);
+      transform: translateY(-2px);
     }
 
-    .btn-submit:hover { background: var(--teal-dark); transform: translateY(-1px); }
+    /* ── NEWS / POSTS ── */
+    #news {
+      background: var(--navy);
+    }
+    .news-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.6rem;
+    }
+    .news-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: transform 0.25s, border-color 0.25s;
+    }
+    .news-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(0, 201, 167, 0.3);
+    }
+    .news-card-img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      display: block;
+      background: var(--navy-light);
+    }
+    .news-card-img-placeholder {
+      width: 100%;
+      height: 180px;
+      background: linear-gradient(135deg, var(--navy-light), var(--navy-mid));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.8rem;
+      color: var(--muted);
+    }
+    .news-card-body {
+      padding: 1.4rem;
+    }
+    .news-type-badge {
+      display: inline-block;
+      padding: 0.2rem 0.8rem;
+      border-radius: 6px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 0.7rem;
+    }
+    .news-type-badge.blog {
+      background: rgba(0, 201, 167, 0.12);
+      color: var(--teal);
+    }
+    .news-type-badge.ad {
+      background: rgba(255, 107, 53, 0.12);
+      color: var(--accent);
+    }
+    .news-type-badge.announcement {
+      background: rgba(255, 200, 0, 0.12);
+      color: #ffd000;
+    }
+    .news-card-body h3 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1.05rem;
+      margin-bottom: 0.6rem;
+      line-height: 1.3;
+    }
+    .news-card-body .news-content {
+      color: var(--muted);
+      font-size: 0.85rem;
+      line-height: 1.6;
+      display: -webkit-box;
+      -webkit-line-clamp: 4;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .news-card-body .news-content p {
+      margin-bottom: 0.5rem;
+    }
+    .news-card-body .news-content ul,
+    .news-card-body .news-content ol {
+      padding-left: 1.2rem;
+      margin-bottom: 0.5rem;
+    }
+    .news-date {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 0.8rem;
+    }
 
     /* ── FOOTER ── */
     footer {
       background: var(--navy);
-      border-top: 1px solid rgba(255,255,255,0.06);
+      border-top: 1px solid var(--border);
       padding: 3rem 5% 2rem;
     }
-
     .footer-inner {
       display: flex;
       justify-content: space-between;
@@ -713,624 +912,669 @@
       gap: 1.5rem;
       margin-bottom: 2rem;
     }
-
     .footer-logo {
       font-family: 'Syne', sans-serif;
       font-weight: 800;
       font-size: 1.2rem;
       color: var(--white);
     }
-
-    .footer-logo span { color: var(--teal); }
-
+    .footer-logo span {
+      color: var(--teal);
+    }
     .footer-links {
       list-style: none;
       display: flex;
       gap: 1.8rem;
     }
-
     .footer-links a {
       color: var(--muted);
       text-decoration: none;
-      font-size: .85rem;
-      transition: color .2s;
+      font-size: 0.85rem;
+      transition: color 0.2s;
     }
-
-    .footer-links a:hover { color: var(--teal); }
-
+    .footer-links a:hover {
+      color: var(--teal);
+    }
     .footer-bottom {
       text-align: center;
       color: var(--muted);
-      font-size: .8rem;
+      font-size: 0.8rem;
       padding-top: 1.5rem;
-      border-top: 1px solid rgba(255,255,255,0.06);
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── FLOATING WHATSAPP ── */
+    .whatsapp-float {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      z-index: 999;
+      width: 60px;
+      height: 60px;
+      background: #25d366;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 28px rgba(37, 211, 102, 0.4);
+      transition: transform 0.3s, box-shadow 0.3s;
+      text-decoration: none;
+      color: #fff;
+      font-size: 2rem;
+    }
+    .whatsapp-float:hover {
+      transform: scale(1.1);
+      box-shadow: 0 12px 36px rgba(37, 211, 102, 0.6);
     }
 
     /* ── TOAST ── */
     #toast {
       position: fixed;
-      bottom: 2rem; right: 2rem;
+      bottom: 6rem;
+      right: 2rem;
       background: var(--teal);
       color: var(--navy);
-      padding: .9rem 1.5rem;
-      border-radius: 10px;
+      padding: 0.9rem 1.6rem;
+      border-radius: 14px;
       font-weight: 700;
-      font-size: .9rem;
+      font-size: 0.9rem;
       z-index: 999;
       transform: translateY(80px);
       opacity: 0;
-      transition: all .4s cubic-bezier(0.34, 1.56, 0.64, 1);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(8px);
     }
-
-    #toast.show { transform: translateY(0); opacity: 1; }
-
-    /* ── RESPONSIVE ── */
-    @media (max-width: 768px) {
-      nav ul { display: none; }
-      .phones-layout, .why-grid, .contact-grid { grid-template-columns: 1fr; gap: 2.5rem; }
-      .online-grid { grid-template-columns: 1fr 1fr; }
-      .phones-cards { grid-template-columns: 1fr 1fr; }
-      .hero-stats { gap: 1.5rem; }
-      .form-row { grid-template-columns: 1fr; }
-    }
-
-    @media (max-width: 480px) {
-      .online-grid { grid-template-columns: 1fr; }
-      .phones-cards { grid-template-columns: 1fr; }
+    #toast.show {
+      transform: translateY(0);
+      opacity: 1;
     }
 
     /* ── SCROLL REVEAL ── */
     .reveal {
       opacity: 0;
-      transform: translateY(24px);
-      transition: opacity .7s ease, transform .7s ease;
+      transform: translateY(28px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
     }
-    .reveal.visible { opacity: 1; transform: none; }
-
-    /* ── LIVE STATUS BAR ── */
-    #status-bar {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      z-index: 200;
-      padding: .5rem 5%;
-      font-size: .82rem;
-      font-weight: 600;
-      text-align: center;
-      letter-spacing: .02em;
-      transition: background .4s;
-    }
-    #status-bar.open-bar  { background: rgba(0,201,167,0.92); color: #0a1628; display: block; }
-    #status-bar.closed-bar { background: rgba(224,82,82,0.92); color: #fff; display: block; }
-    body.has-status-bar nav { top: 36px; }
-    body.has-status-bar #hero { padding-top: 10rem; }
-
-    /* ── POSTS / BLOG SECTION ── */
-    #news { background: var(--navy); }
-
-    .news-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 1.4rem;
+    .reveal.visible {
+      opacity: 1;
+      transform: none;
     }
 
-    .news-card {
-      background: var(--card-bg);
-      border: 1px solid rgba(255,255,255,0.07);
-      border-radius: 14px;
-      overflow: hidden;
-      transition: transform .2s, border-color .2s;
-    }
-    .news-card:hover { transform: translateY(-4px); border-color: rgba(0,201,167,0.25); }
-
-    .news-card-img {
-      width: 100%; height: 160px;
-      object-fit: cover;
-      display: block;
-      background: var(--navy-light);
+    /* ── RESPONSIVE ── */
+    @media (max-width: 992px) {
+      .phones-layout,
+      .why-grid,
+      .contact-grid {
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+      }
+      .online-grid {
+        grid-template-columns: 1fr 1fr;
+      }
     }
 
-    .news-card-img-placeholder {
-      width: 100%; height: 160px;
-      background: linear-gradient(135deg, var(--navy-light), var(--navy-mid));
-      display: flex; align-items: center; justify-content: center;
-      font-size: 2.5rem;
+    @media (max-width: 768px) {
+      nav ul {
+        display: none;
+      }
+      .hero-stats {
+        gap: 1.5rem;
+      }
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+      .phones-cards {
+        grid-template-columns: 1fr 1fr;
+      }
+      .online-grid {
+        grid-template-columns: 1fr;
+      }
+      .news-grid {
+        grid-template-columns: 1fr;
+      }
     }
 
-    .news-card-body { padding: 1.4rem; }
-
-    .news-type-badge {
-      display: inline-block;
-      padding: .2rem .6rem;
-      border-radius: 5px;
-      font-size: .7rem;
-      font-weight: 700;
-      letter-spacing: .06em;
-      text-transform: uppercase;
-      margin-bottom: .7rem;
-    }
-    .news-type-badge.blog { background: rgba(0,201,167,0.12); color: var(--teal); }
-    .news-type-badge.ad { background: rgba(255,107,53,0.12); color: var(--accent); }
-    .news-type-badge.announcement { background: rgba(255,200,0,0.12); color: #ffd000; }
-
-    .news-card-body h3 {
-      font-family: 'Syne', sans-serif;
-      font-weight: 700;
-      font-size: 1rem;
-      margin-bottom: .5rem;
-      line-height: 1.3;
-    }
-
-    .news-card-body p {
-      color: var(--muted);
-      font-size: .85rem;
-      line-height: 1.6;
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-
-    .news-date {
-      font-size: .75rem;
-      color: var(--muted);
-      margin-top: .8rem;
+    @media (max-width: 480px) {
+      .phones-cards {
+        grid-template-columns: 1fr;
+      }
+      .whatsapp-float {
+        width: 50px;
+        height: 50px;
+        font-size: 1.6rem;
+        bottom: 1.5rem;
+        right: 1.5rem;
+      }
     }
   </style>
 </head>
 <body>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<!-- LIVE STATUS BAR -->
-<div id="status-bar"></div>
+  <!-- ══ LIVE STATUS BAR ══ -->
+  <div id="status-bar"></div>
 
-<!-- NAV -->
-<nav>
-  <a href="#" class="logo">Esmer <span>Cyber</span></a>
-  <ul>
-    <li><a href="#services">Services</a></li>
-    <li><a href="#phones">M-KOPA</a></li>
-    <li><a href="#online">Online</a></li>
-    <li><a href="#why">About</a></li>
-    <li><a href="#contact" class="nav-cta">Contact Us</a></li>
-  </ul>
-</nav>
-
-<!-- HERO -->
-<section id="hero">
-  <div class="hero-glow"></div>
-  <div class="hero-glow-2"></div>
-  <div class="hero-inner">
-    <div class="hero-badge" id="hero-status-badge">Your Digital Hub</div>
-    <h1>
-      Your All-In-One<br>
-      <span class="highlight">Cyber Solutions</span><br>
-      Partner
-    </h1>
-    <p class="hero-desc">
-      Esmer Cyber Solutions offers printing, photocopying, online government services, M-KOPA phones, and much more — all under one roof.
-    </p>
-    <div class="hero-btns">
-      <a href="#services" class="btn-primary">Explore Services</a>
-      <a href="#contact" class="btn-outline">Get in Touch</a>
-    </div>
-    <div class="hero-stats">
-      <div class="stat-item">
-        <div class="stat-num">9+</div>
-        <div class="stat-label">Services Offered</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-num">Fast</div>
-        <div class="stat-label">Turnaround</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-num">M-KOPA</div>
-        <div class="stat-label">Certified Dealer</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- SERVICES -->
-<section id="services">
-  <div class="services-header reveal">
-    <div class="section-tag">What We Do</div>
-    <h2>Our Core Services</h2>
-    <p class="section-sub">Everything you need — from document printing to government portals — handled quickly and professionally.</p>
-  </div>
-  <div class="services-grid">
-    <div class="service-card reveal">
-      <div class="service-icon">🖨️</div>
-      <h3>Photocopy & Printing</h3>
-      <p>High-quality black & white and colour printing. A4, A3, bulk orders welcome. Fast service.</p>
-    </div>
-    <div class="service-card reveal">
-      <div class="service-icon">🌐</div>
-      <h3>Online Services</h3>
-      <p>We handle all online applications and submissions — saving you time and frustration.</p>
-    </div>
-    <div class="service-card reveal">
-      <div class="service-icon">🏛️</div>
-      <h3>KRA Services</h3>
-      <p>PIN registration, iTax filing, tax compliance certificates, and KRA portal assistance.</p>
-    </div>
-    <div class="service-card reveal">
-      <div class="service-icon">🪪</div>
-      <h3>eCitizen</h3>
-      <p>Passport applications, good conduct, business registration, and all eCitizen services.</p>
-    </div>
-    <div class="service-card reveal">
-      <div class="service-icon">🚗</div>
-      <h3>NTSA Services</h3>
-      <p>Driving licence applications, vehicle transfers, TIMS portal — all NTSA transactions.</p>
-    </div>
-    <div class="service-card reveal">
-      <div class="service-icon">📜</div>
-      <h3>Eulogy Design</h3>
-      <p>Professionally designed and printed eulogies for funeral services — done with care and dignity.</p>
-    </div>
-    <div class="service-card reveal">
-      <div class="service-icon">💍</div>
-      <h3>Wedding Cards</h3>
-      <p>Custom-designed invitation cards for your special day. Elegant, affordable, and memorable.</p>
-    </div>
-    <div class="service-card reveal">
-      <div class="service-icon">💼</div>
-      <h3>Business Cards</h3>
-      <p>Sleek, professional business cards designed and printed to make a great first impression.</p>
-    </div>
-  </div>
-</section>
-
-<!-- MKOPA PHONES -->
-<section id="phones">
-  <div class="phones-layout">
-    <div class="phones-text reveal">
-      <div class="mkopa-badge">📱 M-KOPA Dealer</div>
-      <h2>Affordable Smartphones on Easy Payment</h2>
-      <p class="section-sub">We are an authorized M-KOPA dealer. Get a quality smartphone today with a small deposit and pay the rest in daily installments.</p>
-      <ul class="phones-features">
-        <li>Pay-as-you-go daily installments</li>
-        <li>No credit history required</li>
-        <li>Latest Android smartphones</li>
-        <li>Comes with free data bundles</li>
-        <li>After full payment — 100% yours</li>
-      </ul>
-      <a href="#contact" class="btn-primary">Inquire About Phones</a>
-    </div>
-    <div class="phones-cards reveal">
-      <div class="phone-card">
-        <span class="phone-emoji">📱</span>
-        <h4>M-KOPA 5G Basic</h4>
-        <div class="price">From KES 30/day</div>
-        <div class="price-sub">Deposit from KES 2,000</div>
-      </div>
-      <div class="phone-card">
-        <span class="phone-emoji">📲</span>
-        <h4>M-KOPA Android</h4>
-        <div class="price">From KES 50/day</div>
-        <div class="price-sub">Deposit from KES 3,500</div>
-      </div>
-      <div class="phone-card">
-        <span class="phone-emoji">🤳</span>
-        <h4>M-KOPA Smart X</h4>
-        <div class="price">From KES 65/day</div>
-        <div class="price-sub">Deposit from KES 4,000</div>
-      </div>
-      <div class="phone-card">
-        <span class="phone-emoji">💡</span>
-        <h4>M-KOPA Pro Plus</h4>
-        <div class="price">From KES 80/day</div>
-        <div class="price-sub">Deposit from KES 5,000</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ONLINE SERVICES DETAIL -->
-<section id="online">
-  <div class="reveal" style="text-align:center">
-    <div class="section-tag">Government Portals</div>
-    <h2>Online Government Services</h2>
-    <p class="section-sub" style="margin:0 auto 3rem">We navigate Kenya's government portals on your behalf — quickly and correctly.</p>
-  </div>
-  <div class="online-grid reveal">
-    <div class="online-card">
-      <div class="online-icon">🔑</div>
-      <div>
-        <h4>KRA / iTax</h4>
-        <p>PIN registration, tax filing, compliance certificate, KRA returns.</p>
-      </div>
-    </div>
-    <div class="online-card">
-      <div class="online-icon">🪪</div>
-      <div>
-        <h4>eCitizen Portal</h4>
-        <p>Passport, ID, birth certificates, business name registration.</p>
-      </div>
-    </div>
-    <div class="online-card">
-      <div class="online-icon">🚘</div>
-      <div>
-        <h4>NTSA / TIMS</h4>
-        <p>DL applications, vehicle transfer of ownership, motor vehicle inspection.</p>
-      </div>
-    </div>
-    <div class="online-card">
-      <div class="online-icon">🏥</div>
-      <div>
-        <h4>NHIF / SHIF</h4>
-        <p>Registration, contribution updates, and benefit claims assistance.</p>
-      </div>
-    </div>
-    <div class="online-card">
-      <div class="online-icon">💼</div>
-      <div>
-        <h4>NSSF</h4>
-        <p>Member registration, contribution, statement requests, and claims.</p>
-      </div>
-    </div>
-    <div class="online-card">
-      <div class="online-icon">📝</div>
-      <div>
-        <h4>Good Conduct</h4>
-        <p>Police Clearance Certificate applications via DCI portal.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- WHY US -->
-<section id="why">
-  <div class="why-grid">
-    <div class="why-points reveal">
-      <div class="section-tag">Why Esmer Cyber</div>
-      <h2>Fast, Reliable & Friendly</h2>
-      <div class="why-point">
-        <div class="why-num">01</div>
-        <div>
-          <h4>Speed You Can Count On</h4>
-          <p>We handle your tasks quickly — no long queues, no wasted time. Walk in and walk out done.</p>
-        </div>
-      </div>
-      <div class="why-point">
-        <div class="why-num">02</div>
-        <div>
-          <h4>All Services, One Place</h4>
-          <p>Print, photocopy, government portals, phone purchase — everything under one roof.</p>
-        </div>
-      </div>
-      <div class="why-point">
-        <div class="why-num">03</div>
-        <div>
-          <h4>Friendly Expert Help</h4>
-          <p>Our staff will guide you through every step — especially on confusing government platforms.</p>
-        </div>
-      </div>
-      <div class="why-point">
-        <div class="why-num">04</div>
-        <div>
-          <h4>Affordable Pricing</h4>
-          <p>Competitive rates on all services and the best M-KOPA phone deals in the area.</p>
-        </div>
-      </div>
-    </div>
-    <div class="why-visual reveal">
-      <div class="why-visual-title">🕐 Opening Hours</div>
-      <ul class="hours-list">
-        <li><span class="day">Monday – Friday</span><span class="time">7:30 AM – 8:00 PM</span></li>
-        <li><span class="day">Saturday</span><span class="time">8:00 AM – 7:00 PM</span></li>
-        <li><span class="day">Sunday</span><span class="time">9:00 AM – 5:00 PM</span></li>
-        <li><span class="day">Public Holidays</span><span class="time">10:00 AM – 4:00 PM</span></li>
-      </ul>
-      <div class="location-block">
-        <h5>📍 Find Us</h5>
-        <p>Esmer Cyber Solutions<br>Your Town, Kenya</p>
-      </div>
-      <div class="location-block">
-        <h5>📞 Call / WhatsApp</h5>
-        <p>+254 700 000 000</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- CONTACT -->
-<section id="contact">
-  <div class="contact-grid">
-    <div class="contact-info reveal">
-      <div class="section-tag">Get In Touch</div>
-      <h2>We're Here to Help</h2>
-      <p class="section-sub">Have a question or need a service? Reach out — we respond fast.</p>
-      <div class="contact-links">
-        <a href="tel:+254700000000" class="contact-link">
-          <div class="cl-icon">📞</div>
-          <div>
-            <div class="cl-label">Call Us</div>
-            <div class="cl-val">+254 700 000 000</div>
-          </div>
-        </a>
-        <a href="https://wa.me/254700000000" class="contact-link" target="_blank">
-          <div class="cl-icon">💬</div>
-          <div>
-            <div class="cl-label">WhatsApp</div>
-            <div class="cl-val">Chat with Us Now</div>
-          </div>
-        </a>
-        <a href="mailto:info@esmercyber.co.ke" class="contact-link">
-          <div class="cl-icon">✉️</div>
-          <div>
-            <div class="cl-label">Email</div>
-            <div class="cl-val">info@esmercyber.co.ke</div>
-          </div>
-        </a>
-      </div>
-    </div>
-    <div class="contact-form reveal">
-      <h3>Send Us a Message</h3>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Your Name</label>
-          <input type="text" id="fname" placeholder="Jane Wanjiku"/>
-        </div>
-        <div class="form-group">
-          <label>Phone Number</label>
-          <input type="tel" id="fphone" placeholder="07XX XXX XXX"/>
-        </div>
-      </div>
-      <div class="form-group">
-        <label>Service Needed</label>
-        <select id="fservice">
-          <option value="">— Select a service —</option>
-          <option>Printing / Photocopy</option>
-          <option>KRA Services</option>
-          <option>eCitizen Services</option>
-          <option>NTSA Services</option>
-          <option>M-KOPA Phone</option>
-          <option>Eulogy Design</option>
-          <option>Wedding Cards</option>
-          <option>Business Cards</option>
-          <option>Other</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Message</label>
-        <textarea id="fmsg" rows="4" placeholder="Tell us what you need…"></textarea>
-      </div>
-      <button class="btn-submit" onclick="handleSubmit()">Send Message →</button>
-    </div>
-  </div>
-</section>
-
-<!-- NEWS / POSTS (live from admin) -->
-<section id="news" style="display:none">
-  <div style="text-align:center" class="reveal">
-    <div class="section-tag">Latest from Us</div>
-    <h2>News & Updates</h2>
-    <p class="section-sub" style="margin:0 auto 3rem">Offers, announcements, and updates from Esmer Cyber Solutions.</p>
-  </div>
-  <div class="news-grid" id="news-grid"></div>
-</section>
-
-<!-- FOOTER -->
-<footer>
-  <div class="footer-inner">
-    <div class="footer-logo">Esmer <span>Cyber</span> Solutions</div>
-    <ul class="footer-links">
+  <!-- ══ NAV ══ -->
+  <nav>
+    <a href="#" class="logo">Esmer <span>Cyber</span></a>
+    <ul>
       <li><a href="#services">Services</a></li>
-      <li><a href="#phones">M-KOPA</a></li>
+      <li><a href="#phones">M‑KOPA</a></li>
       <li><a href="#online">Online</a></li>
-      <li><a href="#contact">Contact</a></li>
+      <li><a href="#why">About</a></li>
+      <li><a href="#contact" class="nav-cta">Contact Us</a></li>
     </ul>
-  </div>
-  <div class="footer-bottom">
-    © 2025 Esmer Cyber Solutions. All rights reserved. | Serving our community with pride 🇰🇪<a  href="https://esmer.vercel.app/admin.html?key=marymary">@</a>
-  </div>
-</footer>
+  </nav>
 
-<div id="toast">✅ Message sent! We'll be in touch shortly.</div>
+  <!-- ══ HERO ══ -->
+  <section id="hero">
+    <div class="hero-glow"></div>
+    <div class="hero-glow-2"></div>
+    <div class="hero-inner">
+      <div class="hero-badge" id="hero-status-badge">Your Digital Hub</div>
+      <h1>
+        Your All‑In‑One<br />
+        <span class="highlight">Cyber Solutions</span><br />
+        Partner
+      </h1>
+      <p class="hero-desc">
+        Esmer Cyber Solutions offers printing, photocopying, online government services, M‑KOPA phones, and much more — all under one roof.
+      </p>
+      <div class="hero-btns">
+        <a href="#services" class="btn-primary">Explore Services</a>
+        <a href="#contact" class="btn-outline">Get in Touch</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-item">
+          <div class="stat-num">9+</div>
+          <div class="stat-label">Services Offered</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">Fast</div>
+          <div class="stat-label">Turnaround</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">M‑KOPA</div>
+          <div class="stat-label">Certified Dealer</div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-<script>
-  // ── SUPABASE ──
-  const SUPA_URL = 'https://avfnlkygxrfbjhvfoxog.supabase.co';
-  const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF2Zm5sa3lneHJmYmpodmZveG9nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MzM4MjYsImV4cCI6MjA5NzMwOTgyNn0.QgzTKoDUWw5iFafdE4f8WTnY51m6oyw-0uLC4eJyvyY';
-  const { createClient } = supabase;
-  const sb = createClient(SUPA_URL, SUPA_KEY);
+  <!-- ══ SERVICES ══ -->
+  <section id="services">
+    <div class="services-header reveal">
+      <div class="section-tag">What We Do</div>
+      <h2>Our Core Services</h2>
+      <p class="section-sub">Everything you need — from document printing to government portals — handled quickly and professionally.</p>
+    </div>
+    <div class="services-grid">
+      <div class="service-card reveal">
+        <div class="service-icon">🖨️</div>
+        <h3>Photocopy & Printing</h3>
+        <p>High‑quality black & white and colour printing. A4, A3, bulk orders welcome. Fast service.</p>
+      </div>
+      <div class="service-card reveal">
+        <div class="service-icon">🌐</div>
+        <h3>Online Services</h3>
+        <p>We handle all online applications and submissions — saving you time and frustration.</p>
+      </div>
+      <div class="service-card reveal">
+        <div class="service-icon">🏛️</div>
+        <h3>KRA Services</h3>
+        <p>PIN registration, iTax filing, tax compliance certificates, and KRA portal assistance.</p>
+      </div>
+      <div class="service-card reveal">
+        <div class="service-icon">🪪</div>
+        <h3>eCitizen</h3>
+        <p>Passport applications, good conduct, business registration, and all eCitizen services.</p>
+      </div>
+      <div class="service-card reveal">
+        <div class="service-icon">🚗</div>
+        <h3>NTSA Services</h3>
+        <p>Driving licence applications, vehicle transfers, TIMS portal — all NTSA transactions.</p>
+      </div>
+      <div class="service-card reveal">
+        <div class="service-icon">📜</div>
+        <h3>Eulogy Design</h3>
+        <p>Professionally designed and printed eulogies for funeral services — done with care and dignity.</p>
+      </div>
+      <div class="service-card reveal">
+        <div class="service-icon">💍</div>
+        <h3>Wedding Cards</h3>
+        <p>Custom‑designed invitation cards for your special day. Elegant, affordable, and memorable.</p>
+      </div>
+      <div class="service-card reveal">
+        <div class="service-icon">💼</div>
+        <h3>Business Cards</h3>
+        <p>Sleek, professional business cards designed and printed to make a great first impression.</p>
+      </div>
+    </div>
+  </section>
 
-  // ── LOAD SHOP STATUS ──
-  async function loadShopStatus() {
-    try {
-      const { data } = await sb.from('shop_status').select('*').eq('id', 1).single();
-      if (!data) return;
-      const bar = document.getElementById('status-bar');
-      const badge = document.getElementById('hero-status-badge');
-      if (data.is_open) {
-        bar.className = 'open-bar';
-        bar.textContent = '🟢 We are OPEN right now' + (data.message ? ' — ' + data.message : '');
-        badge.textContent = '🟢 Open Now — Your Digital Hub';
-      } else {
-        bar.className = 'closed-bar';
-        bar.textContent = '🔴 We are currently CLOSED' + (data.message ? ' — ' + data.message : '');
-        badge.textContent = '🔴 Currently Closed';
-      }
-      document.body.classList.add('has-status-bar');
-    } catch(e) { /* silently fail if table not yet created */ }
-  }
+  <!-- ══ MKOPA ══ -->
+  <section id="phones">
+    <div class="phones-layout">
+      <div class="phones-text reveal">
+        <div class="mkopa-badge">📱 M‑KOPA Dealer</div>
+        <h2>Affordable Smartphones on Easy Payment</h2>
+        <p class="section-sub">We are an authorized M‑KOPA dealer. Get a quality smartphone today with a small deposit and pay the rest in daily installments.</p>
+        <ul class="phones-features">
+          <li>Pay‑as‑you‑go daily installments</li>
+          <li>No credit history required</li>
+          <li>Latest Android smartphones</li>
+          <li>Comes with free data bundles</li>
+          <li>After full payment — 100% yours</li>
+        </ul>
+        <a href="#contact" class="btn-primary">Inquire About Phones</a>
+      </div>
+      <div class="phones-cards reveal">
+        <div class="phone-card">
+          <span class="phone-emoji">📱</span>
+          <h4>M‑KOPA 5G Basic</h4>
+          <div class="price">From KES 30/day</div>
+          <div class="price-sub">Deposit from KES 2,000</div>
+        </div>
+        <div class="phone-card">
+          <span class="phone-emoji">📲</span>
+          <h4>M‑KOPA Android</h4>
+          <div class="price">From KES 50/day</div>
+          <div class="price-sub">Deposit from KES 3,500</div>
+        </div>
+        <div class="phone-card">
+          <span class="phone-emoji">🤳</span>
+          <h4>M‑KOPA Smart X</h4>
+          <div class="price">From KES 65/day</div>
+          <div class="price-sub">Deposit from KES 4,000</div>
+        </div>
+        <div class="phone-card">
+          <span class="phone-emoji">💡</span>
+          <h4>M‑KOPA Pro Plus</h4>
+          <div class="price">From KES 80/day</div>
+          <div class="price-sub">Deposit from KES 5,000</div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-  // ── LOAD POSTS ──
-  async function loadPosts() {
-    try {
-      const { data } = await sb.from('posts').select('*').eq('is_published', true).order('created_at', { ascending: false });
-      if (!data || !data.length) return;
-      const section = document.getElementById('news');
-      const grid = document.getElementById('news-grid');
-      const typeEmoji = { blog: '📰', ad: '📢', announcement: '📣' };
-      grid.innerHTML = data.map(p => `
-        <div class="news-card">
-          ${p.image_url
-            ? `<img class="news-card-img" src="${p.image_url}" alt="${esc(p.title)}" onerror="this.style.display='none'">`
-            : `<div class="news-card-img-placeholder">${typeEmoji[p.type] || '📄'}</div>`}
-          <div class="news-card-body">
-            <span class="news-type-badge ${p.type}">${p.type}</span>
-            <h3>${esc(p.title)}</h3>
-            <p>${esc(p.body)}</p>
-            <div class="news-date">${new Date(p.created_at).toLocaleDateString('en-KE', { day:'numeric', month:'long', year:'numeric' })}</div>
+  <!-- ══ ONLINE SERVICES ══ -->
+  <section id="online">
+    <div class="reveal" style="text-align:center">
+      <div class="section-tag">Government Portals</div>
+      <h2>Online Government Services</h2>
+      <p class="section-sub" style="margin:0 auto 3rem">We navigate Kenya's government portals on your behalf — quickly and correctly.</p>
+    </div>
+    <div class="online-grid reveal">
+      <div class="online-card">
+        <div class="online-icon">🔑</div>
+        <div>
+          <h4>KRA / iTax</h4>
+          <p>PIN registration, tax filing, compliance certificate, KRA returns.</p>
+        </div>
+      </div>
+      <div class="online-card">
+        <div class="online-icon">🪪</div>
+        <div>
+          <h4>eCitizen Portal</h4>
+          <p>Passport, ID, birth certificates, business name registration.</p>
+        </div>
+      </div>
+      <div class="online-card">
+        <div class="online-icon">🚘</div>
+        <div>
+          <h4>NTSA / TIMS</h4>
+          <p>DL applications, vehicle transfer of ownership, motor vehicle inspection.</p>
+        </div>
+      </div>
+      <div class="online-card">
+        <div class="online-icon">🏥</div>
+        <div>
+          <h4>NHIF / SHIF</h4>
+          <p>Registration, contribution updates, and benefit claims assistance.</p>
+        </div>
+      </div>
+      <div class="online-card">
+        <div class="online-icon">💼</div>
+        <div>
+          <h4>NSSF</h4>
+          <p>Member registration, contribution, statement requests, and claims.</p>
+        </div>
+      </div>
+      <div class="online-card">
+        <div class="online-icon">📝</div>
+        <div>
+          <h4>Good Conduct</h4>
+          <p>Police Clearance Certificate applications via DCI portal.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ WHY US ══ -->
+  <section id="why">
+    <div class="why-grid">
+      <div class="why-points reveal">
+        <div class="section-tag">Why Esmer Cyber</div>
+        <h2>Fast, Reliable & Friendly</h2>
+        <div class="why-point">
+          <div class="why-num">01</div>
+          <div>
+            <h4>Speed You Can Count On</h4>
+            <p>We handle your tasks quickly — no long queues, no wasted time. Walk in and walk out done.</p>
           </div>
         </div>
-      `).join('');
-      section.style.display = 'block';
+        <div class="why-point">
+          <div class="why-num">02</div>
+          <div>
+            <h4>All Services, One Place</h4>
+            <p>Print, photocopy, government portals, phone purchase — everything under one roof.</p>
+          </div>
+        </div>
+        <div class="why-point">
+          <div class="why-num">03</div>
+          <div>
+            <h4>Friendly Expert Help</h4>
+            <p>Our staff will guide you through every step — especially on confusing government platforms.</p>
+          </div>
+        </div>
+        <div class="why-point">
+          <div class="why-num">04</div>
+          <div>
+            <h4>Affordable Pricing</h4>
+            <p>Competitive rates on all services and the best M‑KOPA phone deals in the area.</p>
+          </div>
+        </div>
+      </div>
+      <div class="why-visual reveal">
+        <div class="why-visual-title">🕐 Opening Hours</div>
+        <ul class="hours-list">
+          <li><span class="day">Monday – Friday</span><span class="time">7:30 AM – 8:00 PM</span></li>
+          <li><span class="day">Saturday</span><span class="time">8:00 AM – 7:00 PM</span></li>
+          <li><span class="day">Sunday</span><span class="time">9:00 AM – 5:00 PM</span></li>
+          <li><span class="day">Public Holidays</span><span class="time">10:00 AM – 4:00 PM</span></li>
+        </ul>
+        <div class="location-block">
+          <h5>📍 Find Us</h5>
+          <p>Esmer Cyber Solutions<br />Your Town, Kenya</p>
+        </div>
+        <div class="location-block">
+          <h5>📞 Call / WhatsApp</h5>
+          <p>+254 700 000 000</p>
+        </div>
+      </div>
+    </div>
+  </section>
 
-      // observe new cards for reveal
-      section.querySelectorAll('.news-card').forEach(el => {
-        el.classList.add('reveal');
-        observer.observe(el);
-      });
-    } catch(e) { /* silently fail */ }
-  }
+  <!-- ══ CONTACT ══ -->
+  <section id="contact">
+    <div class="contact-grid">
+      <div class="contact-info reveal">
+        <div class="section-tag">Get In Touch</div>
+        <h2>We're Here to Help</h2>
+        <p class="section-sub">Have a question or need a service? Reach out — we respond fast.</p>
+        <div class="contact-links">
+          <a href="tel:+254700000000" class="contact-link">
+            <div class="cl-icon">📞</div>
+            <div>
+              <div class="cl-label">Call Us</div>
+              <div class="cl-val">+254 700 000 000</div>
+            </div>
+          </a>
+          <a href="https://wa.me/254700000000" class="contact-link" target="_blank">
+            <div class="cl-icon">💬</div>
+            <div>
+              <div class="cl-label">WhatsApp</div>
+              <div class="cl-val">Chat with Us Now</div>
+            </div>
+          </a>
+          <a href="mailto:info@esmercyber.co.ke" class="contact-link">
+            <div class="cl-icon">✉️</div>
+            <div>
+              <div class="cl-label">Email</div>
+              <div class="cl-val">info@esmercyber.co.ke</div>
+            </div>
+          </a>
+        </div>
+      </div>
+      <div class="contact-form reveal">
+        <h3>Send Us a Message</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Your Name</label>
+            <input type="text" id="fname" placeholder="Jane Wanjiku" />
+          </div>
+          <div class="form-group">
+            <label>Phone Number</label>
+            <input type="tel" id="fphone" placeholder="07XX XXX XXX" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Service Needed</label>
+          <select id="fservice">
+            <option value="">— Select a service —</option>
+            <option>Printing / Photocopy</option>
+            <option>KRA Services</option>
+            <option>eCitizen Services</option>
+            <option>NTSA Services</option>
+            <option>M‑KOPA Phone</option>
+            <option>Eulogy Design</option>
+            <option>Wedding Cards</option>
+            <option>Business Cards</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Message</label>
+          <textarea id="fmsg" rows="4" placeholder="Tell us what you need…"></textarea>
+        </div>
+        <button class="btn-submit" onclick="handleSubmit()">Send Message →</button>
+      </div>
+    </div>
+  </section>
 
-  function esc(str) {
-    return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  }
+  <!-- ══ NEWS / POSTS ══ -->
+  <section id="news" style="display:none">
+    <div style="text-align:center" class="reveal">
+      <div class="section-tag">Latest from Us</div>
+      <h2>News & Updates</h2>
+      <p class="section-sub" style="margin:0 auto 3rem">Offers, announcements, and updates from Esmer Cyber Solutions.</p>
+    </div>
+    <div class="news-grid" id="news-grid"></div>
+  </section>
 
-  // ── SCROLL REVEAL ──
-  const reveals = document.querySelectorAll('.reveal');
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry, i) => {
-      if (entry.isIntersecting) {
-        setTimeout(() => entry.target.classList.add('visible'), i * 80);
-        observer.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.12 });
-  reveals.forEach(el => observer.observe(el));
+  <!-- ══ FOOTER ══ -->
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-logo">Esmer <span>Cyber</span> Solutions</div>
+      <ul class="footer-links">
+        <li><a href="#services">Services</a></li>
+        <li><a href="#phones">M‑KOPA</a></li>
+        <li><a href="#online">Online</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </div>
+    <div class="footer-bottom">
+      © 2025 Esmer Cyber Solutions. All rights reserved. | Serving our community with pride 🇰🇪
+    </div>
+  </footer>
 
-  // ── FORM SUBMIT ──
-  function handleSubmit() {
-    const name = document.getElementById('fname').value.trim();
-    const phone = document.getElementById('fphone').value.trim();
-    const service = document.getElementById('fservice').value;
-    if (!name || !phone || !service) {
-      alert('Please fill in your name, phone, and service needed.');
-      return;
+  <!-- ══ FLOATING WHATSAPP ══ -->
+  <a href="https://wa.me/254700000000" target="_blank" class="whatsapp-float" aria-label="Chat on WhatsApp">
+    💬
+  </a>
+
+  <!-- ══ TOAST ══ -->
+  <div id="toast">✅ Message sent! We'll be in touch shortly.</div>
+
+  <!-- ══ SUPABASE ══ -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // ── SUPABASE ──
+    const SUPA_URL = 'https://avfnlkygxrfbjhvfoxog.supabase.co';
+    const SUPA_KEY =
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF2Zm5sa3lneHJmYmpodmZveG9nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MzM4MjYsImV4cCI6MjA5NzMwOTgyNn0.QgzTKoDUWw5iFafdE4f8WTnY51m6oyw-0uLC4eJyvyY';
+    const { createClient } = supabase;
+    const sb = createClient(SUPA_URL, SUPA_KEY);
+
+    // ── LOAD STATUS ──
+    async function loadShopStatus() {
+      try {
+        const { data } = await sb.from('shop_status').select('*').eq('id', 1).single();
+        if (!data) return;
+        const bar = document.getElementById('status-bar');
+        const badge = document.getElementById('hero-status-badge');
+        const isOpen = data.is_open;
+
+        if (isOpen) {
+          bar.className = 'open-bar show';
+          bar.textContent = '🟢 We are OPEN right now' + (data.message ? ' — ' + data.message : '');
+          badge.textContent = '🟢 Open Now — Your Digital Hub';
+        } else {
+          bar.className = 'closed-bar show';
+          bar.textContent = '🔴 We are currently CLOSED' + (data.message ? ' — ' + data.message : '');
+          badge.textContent = '🔴 Currently Closed';
+        }
+      } catch (e) { /* ignore */ }
     }
-    const toast = document.getElementById('toast');
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 3500);
-    document.getElementById('fname').value = '';
-    document.getElementById('fphone').value = '';
-    document.getElementById('fservice').value = '';
-    document.getElementById('fmsg').value = '';
-  }
 
-  // Stagger service cards
-  document.querySelectorAll('.service-card').forEach((card, i) => {
-    card.style.transitionDelay = `${i * 60}ms`;
-  });
+    // ── LOAD POSTS ──
+    async function loadPosts() {
+      try {
+        const { data } = await sb.from('posts').select('*').eq('is_published', true).order('created_at', { ascending: false });
+        if (!data || !data.length) return;
+        const section = document.getElementById('news');
+        const grid = document.getElementById('news-grid');
+        const typeEmoji = { blog: '📰', ad: '📢', announcement: '📣' };
 
-  // Init live data
-  loadShopStatus();
-  loadPosts();
-</script>
+        grid.innerHTML = data.map(p => `
+          <div class="news-card reveal">
+            ${p.image_url
+              ? `<img class="news-card-img" src="${p.image_url}" alt="${esc(p.title)}" loading="lazy" onerror="this.style.display='none'">`
+              : `<div class="news-card-img-placeholder">${typeEmoji[p.type] || '📄'}</div>`}
+            <div class="news-card-body">
+              <span class="news-type-badge ${p.type}">${p.type}</span>
+              <h3>${esc(p.title)}</h3>
+              <div class="news-content">${p.body || ''}</div>
+              <div class="news-date">${new Date(p.created_at).toLocaleDateString('en-KE', { day:'numeric', month:'long', year:'numeric' })}</div>
+            </div>
+          </div>
+        `).join('');
+
+        section.style.display = 'block';
+        // Re‑observe new cards
+        section.querySelectorAll('.news-card.reveal').forEach(el => observer.observe(el));
+      } catch (e) { /* ignore */ }
+    }
+
+    // ── SUBMIT CONTACT FORM (saves to Supabase) ──
+    async function handleSubmit() {
+      const name = document.getElementById('fname').value.trim();
+      const phone = document.getElementById('fphone').value.trim();
+      const service = document.getElementById('fservice').value;
+      const message = document.getElementById('fmsg').value.trim();
+
+      if (!name || !phone || !service) {
+        alert('Please fill in your name, phone, and service needed.');
+        return;
+      }
+
+      try {
+        const { error } = await sb.from('messages').insert({
+          name,
+          phone,
+          service,
+          message,
+          created_at: new Date().toISOString()
+        });
+
+        if (error) throw error;
+
+        // Show success toast
+        const toast = document.getElementById('toast');
+        toast.textContent = '✅ Message sent! We\'ll be in touch shortly.';
+        toast.className = 'show';
+        setTimeout(() => toast.className = '', 4000);
+
+        // Clear form
+        document.getElementById('fname').value = '';
+        document.getElementById('fphone').value = '';
+        document.getElementById('fservice').value = '';
+        document.getElementById('fmsg').value = '';
+      } catch (err) {
+        alert('Failed to send message. Please try again or call us directly.');
+        console.error(err);
+      }
+    }
+
+    // ── ESCAPE ──
+    function esc(str) {
+      return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    // ── SCROLL REVEAL ──
+    const reveals = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => entry.target.classList.add('visible'), i * 80);
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    reveals.forEach(el => observer.observe(el));
+
+    // Stagger service cards
+    document.querySelectorAll('.service-card').forEach((card, i) => {
+      card.style.transitionDelay = `${i * 60}ms`;
+    });
+
+    // ── REALTIME SUBSCRIPTIONS ──
+    function subscribeToRealtime() {
+      // Status updates
+      sb.channel('public:shop_status')
+        .on(
+          'postgres_changes', {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'shop_status',
+            filter: 'id=eq.1'
+          },
+          () => loadShopStatus()
+        )
+        .subscribe();
+
+      // New posts (or updates to published status)
+      sb.channel('public:posts')
+        .on(
+          'postgres_changes', {
+            event: '*',
+            schema: 'public',
+            table: 'posts'
+          },
+          () => loadPosts()
+        )
+        .subscribe();
+    }
+
+    // ── INIT ──
+    loadShopStatus();
+    loadPosts();
+    subscribeToRealtime();
+
+    // If you want to store contact messages, create the table first:
+    /*
+    create table messages (
+      id uuid primary key default gen_random_uuid(),
+      name text not null,
+      phone text not null,
+      service text not null,
+      message text,
+      created_at timestamptz default now()
+    );
+    alter table messages enable row level security;
+    create policy "Allow insert" on messages for insert with check (true);
+    create policy "Allow authenticated read" on messages for select using (auth.role() = 'authenticated');
+    */
+  </script>
 </body>
 </html>
