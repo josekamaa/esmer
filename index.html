@@ -11,7 +11,6 @@
     :root {
       --teal: #00c9a7;
       --teal-dark: #009e85;
-      --teal-glow: rgba(0, 201, 167, 0.3);
       --navy: #0a1628;
       --navy-mid: #111e35;
       --navy-light: #1a2f4e;
@@ -21,7 +20,7 @@
       --card-bg: rgba(26, 47, 78, 0.6);
       --border: rgba(255, 255, 255, 0.08);
       --nav-height: 56px;
-      --status-bar-height: 0px; /* dynamically set by JS */
+      --status-bar-height: 0px;
     }
 
     *,
@@ -41,17 +40,16 @@
       background: var(--navy);
       color: var(--white);
       overflow-x: hidden;
-      /* dynamic padding = nav height + status bar height */
       padding-top: calc(var(--nav-height) + var(--status-bar-height));
       position: relative;
       transition: padding-top 0.3s;
     }
 
-    /* ── ANIMATED MESH GRADIENT BACKGROUND ── */
+    /* ── ANIMATED MESH GRADIENT ── */
     .bg-mesh {
       position: fixed;
       inset: 0;
-      z-index: -1;
+      z-index: -2;
       background: var(--navy);
       overflow: hidden;
     }
@@ -84,16 +82,15 @@
       }
     }
 
-    /* ── SUBTLE GRID OVERLAY ── */
-    .bg-grid {
+    /* ── TECH PATTERN OVERLAY (Background Image) ── */
+    .bg-pattern {
       position: fixed;
       inset: 0;
       z-index: -1;
-      background-image:
-        linear-gradient(rgba(0, 201, 167, 0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 201, 167, 0.04) 1px, transparent 1px);
-      background-size: 60px 60px;
+      background-image: radial-gradient(circle at 25px 25px, rgba(0, 201, 167, 0.06) 1.5px, transparent 1.5px);
+      background-size: 50px 50px;
       pointer-events: none;
+      opacity: 0.6;
     }
 
     /* ── LIVE STATUS BAR ── */
@@ -156,7 +153,6 @@
       color: var(--teal);
     }
 
-    /* Desktop nav links */
     nav ul {
       list-style: none;
       display: flex;
@@ -206,7 +202,6 @@
       box-shadow: 0 8px 24px rgba(0, 201, 167, 0.3);
     }
 
-    /* Mobile toggle */
     .mobile-toggle {
       display: none;
       background: none;
@@ -215,6 +210,7 @@
       font-size: 1.6rem;
       cursor: pointer;
       line-height: 1;
+      padding: 0.2rem 0.5rem;
     }
 
     /* ── HERO ── */
@@ -223,7 +219,7 @@
       display: flex;
       align-items: center;
       position: relative;
-      padding: 6rem 5% 5rem; /* reduced top padding because body already has offset */
+      padding: 6rem 5% 5rem;
       overflow: hidden;
     }
 
@@ -324,8 +320,6 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      color: transparent; /* fallback for Firefox */
-      position: relative;
     }
 
     .hero-desc {
@@ -881,13 +875,57 @@
     /* ── NEWS / POSTS ── */
     #news {
       background: transparent;
-      display: block; /* always visible, grid populated by JS */
     }
+
     .news-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
       gap: 1.6rem;
     }
+
+    /* Skeleton Loading */
+    .skeleton-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      overflow: hidden;
+      backdrop-filter: blur(4px);
+    }
+    .skeleton-img {
+      height: 200px;
+      background: linear-gradient(90deg, var(--navy-light), var(--navy-mid), var(--navy-light));
+      background-size: 200% 100%;
+      animation: shimmer 1.8s infinite;
+    }
+    .skeleton-body {
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+    .skeleton-line {
+      height: 12px;
+      background: var(--navy-light);
+      border-radius: 6px;
+      animation: shimmer 1.8s infinite;
+    }
+    .skeleton-line.short {
+      width: 60%;
+    }
+    .skeleton-line.medium {
+      width: 80%;
+    }
+
+    @keyframes shimmer {
+      0% {
+        background-position: -200% 0;
+      }
+      100% {
+        background-position: 200% 0;
+      }
+    }
+
+    /* News Cards */
     .news-card {
       background: var(--card-bg);
       backdrop-filter: blur(12px);
@@ -901,16 +939,25 @@
       border-color: rgba(0, 201, 167, 0.3);
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
     }
+    .news-card-img-wrap {
+      overflow: hidden;
+      position: relative;
+      height: 200px;
+    }
     .news-card-img {
       width: 100%;
-      height: 200px;
+      height: 100%;
       object-fit: cover;
       display: block;
       background: var(--navy-light);
+      transition: transform 0.4s ease;
+    }
+    .news-card:hover .news-card-img {
+      transform: scale(1.05);
     }
     .news-card-img-placeholder {
       width: 100%;
-      height: 200px;
+      height: 100%;
       background: linear-gradient(135deg, var(--navy-light), var(--navy-mid));
       display: flex;
       align-items: center;
@@ -971,6 +1018,36 @@
       font-size: 0.75rem;
       color: var(--muted);
       margin-top: 0.8rem;
+    }
+
+    /* ── BACK TO TOP ── */
+    .back-to-top {
+      position: fixed;
+      bottom: 6rem;
+      right: 1.5rem;
+      z-index: 99;
+      width: 44px;
+      height: 44px;
+      background: var(--teal);
+      color: var(--navy);
+      border: none;
+      border-radius: 50%;
+      font-size: 1.4rem;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(0, 201, 167, 0.4);
+      transition: opacity 0.3s, transform 0.3s;
+      opacity: 0;
+      transform: translateY(20px);
+      pointer-events: none;
+    }
+    .back-to-top.visible {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    .back-to-top:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 32px rgba(0, 201, 167, 0.6);
     }
 
     /* ── FOOTER ── */
@@ -1105,11 +1182,9 @@
     }
 
     @media (max-width: 768px) {
-      /* Show mobile toggle */
       .mobile-toggle {
         display: block;
       }
-      /* Hide desktop links by default */
       nav ul {
         display: none;
         position: absolute;
@@ -1166,7 +1241,7 @@
 
   <!-- ══ BACKGROUNDS ══ -->
   <div class="bg-mesh"></div>
-  <div class="bg-grid"></div>
+  <div class="bg-pattern"></div>
 
   <!-- ══ LIVE STATUS BAR ══ -->
   <div id="status-bar"></div>
@@ -1466,7 +1541,7 @@
             </div>
             <div class="form-group">
               <label for="fphone">Phone Number</label>
-              <input type="tel" id="fphone" name="phone" placeholder="07XX XXX XXX" required pattern="^\+?\d{7,15}$" />
+              <input type="tel" id="fphone" name="phone" placeholder="+254 792 133 260" required pattern="[0-9+\-\s()]{7,20}" />
             </div>
           </div>
           <div class="form-group">
@@ -1486,7 +1561,7 @@
           </div>
           <div class="form-group">
             <label for="fmsg">Message</label>
-            <textarea id="fmsg" name="message" rows="4" placeholder="Tell us what you need…"></textarea>
+            <textarea id="fmsg" name="message" rows="4" placeholder="Tell us what you need…" required></textarea>
           </div>
           <button type="submit" class="btn-submit" id="submitBtn">Send Message →</button>
         </form>
@@ -1502,7 +1577,10 @@
       <p class="section-sub" style="margin:0 auto 3rem">Offers, announcements, and updates from Esmer Cyber Solutions.</p>
     </div>
     <div class="news-grid" id="news-grid">
-      <!-- Populated by JavaScript -->
+      <!-- Skeleton loaders -->
+      <div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-body"><div class="skeleton-line"></div><div class="skeleton-line medium"></div><div class="skeleton-line short"></div></div></div>
+      <div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-body"><div class="skeleton-line"></div><div class="skeleton-line medium"></div><div class="skeleton-line short"></div></div></div>
+      <div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-body"><div class="skeleton-line"></div><div class="skeleton-line medium"></div><div class="skeleton-line short"></div></div></div>
     </div>
   </section>
 
@@ -1522,6 +1600,9 @@
       <a href="mailto:wanguimuthoni92@gmail.com">wanguimuthoni92@gmail.com</a> | <a href="tel:+254792133260">+254 792 133 260</a>
     </div>
   </footer>
+
+  <!-- ══ BACK TO TOP ══ -->
+  <button class="back-to-top" id="backToTop" aria-label="Back to top">↑</button>
 
   <!-- ══ FLOATING WHATSAPP ══ -->
   <a href="https://wa.me/254792133260" target="_blank" class="whatsapp-float" aria-label="Chat on WhatsApp">
@@ -1565,7 +1646,7 @@
           bar.textContent = '🔴 We are currently CLOSED' + (data.message ? ' — ' + data.message : '');
           badge.textContent = '🔴 Currently Closed';
         }
-        updateStatusBarHeight(true); // status bar is now visible
+        updateStatusBarHeight(true);
       } catch (e) {
         updateStatusBarHeight(false);
       }
@@ -1577,16 +1658,19 @@
         const { data } = await sb.from('posts').select('*').eq('is_published', true).order('created_at', { ascending: false });
         const grid = document.getElementById('news-grid');
         if (!data || !data.length) {
-          grid.innerHTML = '<p style="color:var(--muted);text-align:center;grid-column:1/-1;">No updates yet. Check back soon!</p>';
+          grid.innerHTML =
+            '<p style="color:var(--muted);text-align:center;grid-column:1/-1;padding:2rem 0;">No updates yet. Check back soon!</p>';
           return;
         }
         const typeEmoji = { blog: '📰', ad: '📢', announcement: '📣' };
 
         grid.innerHTML = data.map(p => `
           <div class="news-card reveal">
-            ${p.image_url
-              ? `<img class="news-card-img" src="${esc(p.image_url)}" alt="${esc(p.title)}" loading="lazy" onerror="this.style.display='none'">`
-              : `<div class="news-card-img-placeholder" aria-hidden="true">${typeEmoji[p.type] || '📄'}</div>`}
+            <div class="news-card-img-wrap">
+              ${p.image_url
+                ? `<img class="news-card-img" src="${esc(p.image_url)}" alt="${esc(p.title)}" loading="lazy" onerror="this.style.display='none'">`
+                : `<div class="news-card-img-placeholder" aria-hidden="true">${typeEmoji[p.type] || '📄'}</div>`}
+            </div>
             <div class="news-card-body">
               <span class="news-type-badge ${esc(p.type)}">${esc(p.type)}</span>
               <h3>${esc(p.title)}</h3>
@@ -1601,7 +1685,8 @@
           if (!el.classList.contains('visible')) observer.observe(el);
         });
       } catch (e) {
-        document.getElementById('news-grid').innerHTML = '<p style="color:var(--muted);text-align:center;grid-column:1/-1;">Could not load updates.</p>';
+        document.getElementById('news-grid').innerHTML =
+          '<p style="color:var(--muted);text-align:center;grid-column:1/-1;">Could not load updates.</p>';
       }
     }
 
@@ -1621,7 +1706,6 @@
       const service = document.getElementById('fservice').value;
       const message = document.getElementById('fmsg').value.trim();
 
-      // Disable button and show loading state
       submitBtn.disabled = true;
       submitBtn.textContent = 'Sending…';
 
@@ -1657,7 +1741,6 @@
 
     // ── SCROLL REVEAL ──
     const reveals = document.querySelectorAll('.reveal');
-    // Set staggered delay based on document order
     reveals.forEach((el, i) => {
       el.style.setProperty('--reveal-delay', `${i * 60}ms`);
     });
@@ -1673,14 +1756,22 @@
 
     reveals.forEach(el => observer.observe(el));
 
-    // Add hover transition delays for service cards (already fine)
-    document.querySelectorAll('.service-card').forEach((card, i) => {
-      card.style.transitionDelay = `${i * 60}ms`;
+    // ── BACK TO TOP ──
+    const backBtn = document.getElementById('backToTop');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 400) {
+        backBtn.classList.add('visible');
+      } else {
+        backBtn.classList.remove('visible');
+      }
+    });
+    backBtn.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
     // ── REALTIME ──
     function subscribeToRealtime() {
-      const channelA = sb.channel('public:shop_status')
+      sb.channel('public:shop_status')
         .on(
           'postgres_changes', {
             event: 'UPDATE',
@@ -1692,7 +1783,7 @@
         )
         .subscribe();
 
-      const channelB = sb.channel('public:posts')
+      sb.channel('public:posts')
         .on(
           'postgres_changes', {
             event: '*',
@@ -1702,12 +1793,6 @@
           () => loadPosts()
         )
         .subscribe();
-
-      // Cleanup on page unload
-      window.addEventListener('beforeunload', () => {
-        sb.removeChannel(channelA);
-        sb.removeChannel(channelB);
-      });
     }
 
     // ── INIT ──
