@@ -20,6 +20,8 @@
       --accent: #ff6b35;
       --card-bg: rgba(26, 47, 78, 0.6);
       --border: rgba(255, 255, 255, 0.08);
+      --nav-height: 56px;
+      --status-bar-height: 0px; /* dynamically set by JS */
     }
 
     *,
@@ -39,8 +41,10 @@
       background: var(--navy);
       color: var(--white);
       overflow-x: hidden;
-      padding-top: 36px; /* space for status bar */
+      /* dynamic padding = nav height + status bar height */
+      padding-top: calc(var(--nav-height) + var(--status-bar-height));
       position: relative;
+      transition: padding-top 0.3s;
     }
 
     /* ── ANIMATED MESH GRADIENT BACKGROUND ── */
@@ -105,7 +109,7 @@
       text-align: center;
       letter-spacing: 0.02em;
       backdrop-filter: blur(10px);
-      transition: background 0.4s, transform 0.3s;
+      transition: background 0.4s, transform 0.3s, opacity 0.3s;
       transform: translateY(-100%);
       opacity: 0;
     }
@@ -125,7 +129,7 @@
     /* ── NAV ── */
     nav {
       position: fixed;
-      top: 0;
+      top: var(--status-bar-height);
       left: 0;
       right: 0;
       z-index: 100;
@@ -137,7 +141,7 @@
       backdrop-filter: blur(16px);
       border-bottom: 1px solid var(--border);
       transition: top 0.3s;
-      margin-top: 36px;
+      height: var(--nav-height);
     }
 
     .logo {
@@ -152,6 +156,7 @@
       color: var(--teal);
     }
 
+    /* Desktop nav links */
     nav ul {
       list-style: none;
       display: flex;
@@ -201,13 +206,24 @@
       box-shadow: 0 8px 24px rgba(0, 201, 167, 0.3);
     }
 
+    /* Mobile toggle */
+    .mobile-toggle {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--white);
+      font-size: 1.6rem;
+      cursor: pointer;
+      line-height: 1;
+    }
+
     /* ── HERO ── */
     #hero {
       min-height: 100vh;
       display: flex;
       align-items: center;
       position: relative;
-      padding: 10rem 5% 5rem;
+      padding: 6rem 5% 5rem; /* reduced top padding because body already has offset */
       overflow: hidden;
     }
 
@@ -308,6 +324,7 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
+      color: transparent; /* fallback for Firefox */
       position: relative;
     }
 
@@ -387,6 +404,7 @@
       padding: 5.5rem 5%;
       position: relative;
       z-index: 1;
+      scroll-margin-top: calc(var(--nav-height) + var(--status-bar-height) + 20px);
     }
 
     .section-tag {
@@ -854,10 +872,16 @@
       transform: translateY(-2px);
       box-shadow: 0 8px 28px rgba(0, 201, 167, 0.3);
     }
+    .btn-submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
 
     /* ── NEWS / POSTS ── */
     #news {
       background: transparent;
+      display: block; /* always visible, grid populated by JS */
     }
     .news-grid {
       display: grid;
@@ -1060,6 +1084,7 @@
       opacity: 0;
       transform: translateY(32px);
       transition: opacity 0.8s ease, transform 0.8s ease;
+      transition-delay: var(--reveal-delay, 0s);
     }
     .reveal.visible {
       opacity: 1;
@@ -1080,8 +1105,27 @@
     }
 
     @media (max-width: 768px) {
+      /* Show mobile toggle */
+      .mobile-toggle {
+        display: block;
+      }
+      /* Hide desktop links by default */
       nav ul {
         display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: rgba(10, 22, 40, 0.95);
+        backdrop-filter: blur(16px);
+        flex-direction: column;
+        gap: 1.5rem;
+        padding: 1.5rem 5%;
+        border-bottom: 1px solid var(--border);
+        z-index: 99;
+      }
+      nav ul.open {
+        display: flex;
       }
       .hero-stats {
         gap: 1.5rem;
@@ -1130,6 +1174,9 @@
   <!-- ══ NAV ══ -->
   <nav>
     <a href="#" class="logo">Esmer <span>Cyber</span></a>
+    <button class="mobile-toggle" aria-label="Toggle menu" aria-expanded="false" onclick="document.querySelector('nav ul').classList.toggle('open'); this.setAttribute('aria-expanded', document.querySelector('nav ul').classList.contains('open'));">
+      ☰
+    </button>
     <ul>
       <li><a href="#services">Services</a></li>
       <li><a href="#phones">M‑KOPA</a></li>
@@ -1411,48 +1458,52 @@
       </div>
       <div class="contact-form reveal">
         <h3>Send Us a Message</h3>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Your Name</label>
-            <input type="text" id="fname" placeholder="Jane Wanjiku" />
+        <form id="contactForm" novalidate>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="fname">Your Name</label>
+              <input type="text" id="fname" name="name" placeholder="Jane Wanjiku" required />
+            </div>
+            <div class="form-group">
+              <label for="fphone">Phone Number</label>
+              <input type="tel" id="fphone" name="phone" placeholder="07XX XXX XXX" required pattern="^\+?\d{7,15}$" />
+            </div>
           </div>
           <div class="form-group">
-            <label>Phone Number</label>
-            <input type="tel" id="fphone" placeholder="07XX XXX XXX" />
+            <label for="fservice">Service Needed</label>
+            <select id="fservice" name="service" required>
+              <option value="">— Select a service —</option>
+              <option>Printing / Photocopy</option>
+              <option>KRA Services</option>
+              <option>eCitizen Services</option>
+              <option>NTSA Services</option>
+              <option>M‑KOPA Phone</option>
+              <option>Eulogy Design</option>
+              <option>Wedding Cards</option>
+              <option>Business Cards</option>
+              <option>Other</option>
+            </select>
           </div>
-        </div>
-        <div class="form-group">
-          <label>Service Needed</label>
-          <select id="fservice">
-            <option value="">— Select a service —</option>
-            <option>Printing / Photocopy</option>
-            <option>KRA Services</option>
-            <option>eCitizen Services</option>
-            <option>NTSA Services</option>
-            <option>M‑KOPA Phone</option>
-            <option>Eulogy Design</option>
-            <option>Wedding Cards</option>
-            <option>Business Cards</option>
-            <option>Other</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Message</label>
-          <textarea id="fmsg" rows="4" placeholder="Tell us what you need…"></textarea>
-        </div>
-        <button class="btn-submit" onclick="handleSubmit()">Send Message →</button>
+          <div class="form-group">
+            <label for="fmsg">Message</label>
+            <textarea id="fmsg" name="message" rows="4" placeholder="Tell us what you need…"></textarea>
+          </div>
+          <button type="submit" class="btn-submit" id="submitBtn">Send Message →</button>
+        </form>
       </div>
     </div>
   </section>
 
   <!-- ══ NEWS / POSTS ══ -->
-  <section id="news" style="display:none">
+  <section id="news">
     <div style="text-align:center" class="reveal">
       <div class="section-tag">Latest from Us</div>
       <h2>News & Updates</h2>
       <p class="section-sub" style="margin:0 auto 3rem">Offers, announcements, and updates from Esmer Cyber Solutions.</p>
     </div>
-    <div class="news-grid" id="news-grid"></div>
+    <div class="news-grid" id="news-grid">
+      <!-- Populated by JavaScript -->
+    </div>
   </section>
 
   <!-- ══ FOOTER ══ -->
@@ -1480,8 +1531,9 @@
   <!-- ══ TOAST ══ -->
   <div id="toast">✅ Message sent! We'll be in touch shortly.</div>
 
-  <!-- ══ SUPABASE ══ -->
+  <!-- ══ SUPABASE + DOMPurify ══ -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.8/dist/purify.min.js"></script>
   <script>
     // ── SUPABASE ──
     const SUPA_URL = 'https://avfnlkygxrfbjhvfoxog.supabase.co';
@@ -1489,6 +1541,11 @@
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF2Zm5sa3lneHJmYmpodmZveG9nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MzM4MjYsImV4cCI6MjA5NzMwOTgyNn0.QgzTKoDUWw5iFafdE4f8WTnY51m6oyw-0uLC4eJyvyY';
     const { createClient } = supabase;
     const sb = createClient(SUPA_URL, SUPA_KEY);
+
+    // ── DYNAMIC STATUS BAR HEIGHT ──
+    function updateStatusBarHeight(visible) {
+      document.documentElement.style.setProperty('--status-bar-height', visible ? '36px' : '0px');
+    }
 
     // ── LOAD STATUS ──
     async function loadShopStatus() {
@@ -1508,48 +1565,65 @@
           bar.textContent = '🔴 We are currently CLOSED' + (data.message ? ' — ' + data.message : '');
           badge.textContent = '🔴 Currently Closed';
         }
-      } catch (e) { /* ignore */ }
+        updateStatusBarHeight(true); // status bar is now visible
+      } catch (e) {
+        updateStatusBarHeight(false);
+      }
     }
 
     // ── LOAD POSTS ──
     async function loadPosts() {
       try {
         const { data } = await sb.from('posts').select('*').eq('is_published', true).order('created_at', { ascending: false });
-        if (!data || !data.length) return;
-        const section = document.getElementById('news');
         const grid = document.getElementById('news-grid');
+        if (!data || !data.length) {
+          grid.innerHTML = '<p style="color:var(--muted);text-align:center;grid-column:1/-1;">No updates yet. Check back soon!</p>';
+          return;
+        }
         const typeEmoji = { blog: '📰', ad: '📢', announcement: '📣' };
 
         grid.innerHTML = data.map(p => `
           <div class="news-card reveal">
             ${p.image_url
-              ? `<img class="news-card-img" src="${p.image_url}" alt="${esc(p.title)}" loading="lazy" onerror="this.style.display='none'">`
-              : `<div class="news-card-img-placeholder">${typeEmoji[p.type] || '📄'}</div>`}
+              ? `<img class="news-card-img" src="${esc(p.image_url)}" alt="${esc(p.title)}" loading="lazy" onerror="this.style.display='none'">`
+              : `<div class="news-card-img-placeholder" aria-hidden="true">${typeEmoji[p.type] || '📄'}</div>`}
             <div class="news-card-body">
-              <span class="news-type-badge ${p.type}">${p.type}</span>
+              <span class="news-type-badge ${esc(p.type)}">${esc(p.type)}</span>
               <h3>${esc(p.title)}</h3>
-              <div class="news-content">${p.body || ''}</div>
+              <div class="news-content">${DOMPurify.sanitize(p.body || '')}</div>
               <div class="news-date">${new Date(p.created_at).toLocaleDateString('en-KE', { day:'numeric', month:'long', year:'numeric' })}</div>
             </div>
           </div>
         `).join('');
 
-        section.style.display = 'block';
-        section.querySelectorAll('.news-card.reveal').forEach(el => observer.observe(el));
-      } catch (e) { /* ignore */ }
+        // Re-observe new reveal elements
+        document.querySelectorAll('#news .reveal').forEach(el => {
+          if (!el.classList.contains('visible')) observer.observe(el);
+        });
+      } catch (e) {
+        document.getElementById('news-grid').innerHTML = '<p style="color:var(--muted);text-align:center;grid-column:1/-1;">Could not load updates.</p>';
+      }
     }
 
     // ── SUBMIT CONTACT FORM ──
-    async function handleSubmit() {
+    document.getElementById('contactForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const form = e.target;
+      const submitBtn = document.getElementById('submitBtn');
+
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+
       const name = document.getElementById('fname').value.trim();
       const phone = document.getElementById('fphone').value.trim();
       const service = document.getElementById('fservice').value;
       const message = document.getElementById('fmsg').value.trim();
 
-      if (!name || !phone || !service) {
-        alert('Please fill in your name, phone, and service needed.');
-        return;
-      }
+      // Disable button and show loading state
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Sending…';
 
       try {
         const { error } = await sb.from('messages').insert({
@@ -1567,15 +1641,15 @@
         toast.className = 'show';
         setTimeout(() => toast.className = '', 4000);
 
-        document.getElementById('fname').value = '';
-        document.getElementById('fphone').value = '';
-        document.getElementById('fservice').value = '';
-        document.getElementById('fmsg').value = '';
+        form.reset();
       } catch (err) {
         alert('Failed to send message. Please try again or call us directly.');
         console.error(err);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Send Message →';
       }
-    }
+    });
 
     function esc(str) {
       return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -1583,23 +1657,30 @@
 
     // ── SCROLL REVEAL ──
     const reveals = document.querySelectorAll('.reveal');
+    // Set staggered delay based on document order
+    reveals.forEach((el, i) => {
+      el.style.setProperty('--reveal-delay', `${i * 60}ms`);
+    });
+
     const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry, i) => {
+      entries.forEach(entry => {
         if (entry.isIntersecting) {
-          setTimeout(() => entry.target.classList.add('visible'), i * 80);
+          entry.target.classList.add('visible');
           observer.unobserve(entry.target);
         }
       });
     }, { threshold: 0.12 });
+
     reveals.forEach(el => observer.observe(el));
 
+    // Add hover transition delays for service cards (already fine)
     document.querySelectorAll('.service-card').forEach((card, i) => {
       card.style.transitionDelay = `${i * 60}ms`;
     });
 
     // ── REALTIME ──
     function subscribeToRealtime() {
-      sb.channel('public:shop_status')
+      const channelA = sb.channel('public:shop_status')
         .on(
           'postgres_changes', {
             event: 'UPDATE',
@@ -1611,7 +1692,7 @@
         )
         .subscribe();
 
-      sb.channel('public:posts')
+      const channelB = sb.channel('public:posts')
         .on(
           'postgres_changes', {
             event: '*',
@@ -1621,6 +1702,12 @@
           () => loadPosts()
         )
         .subscribe();
+
+      // Cleanup on page unload
+      window.addEventListener('beforeunload', () => {
+        sb.removeChannel(channelA);
+        sb.removeChannel(channelB);
+      });
     }
 
     // ── INIT ──
