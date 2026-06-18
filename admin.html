@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Esmer Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --teal: #00c9a7;
+      --teal-dark: #009e85;
+      --navy: #0a1628;
+      --navy-mid: #111e35;
+      --navy-light: #1a2f4e;
+      --white: #f0f6ff;
+      --muted: #6b88aa;
+      --accent: #ff6b35;
+      --danger: #e05252;
+      --success: #2ecc71;
+      --card: rgba(26,47,78,0.8);
+      --border: rgba(255,255,255,0.08);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--navy);
+      color: var(--white);
+      min-height: 100vh;
+    }
+
+    /* ── LOGIN SCREEN ── */
+    #login-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(ellipse at 60% 40%, rgba(0,201,167,0.1) 0%, transparent 60%),
+                  radial-gradient(ellipse at 20% 80%, rgba(255,107,53,0.07) 0%, transparent 50%),
+                  var(--navy);
+    }
+
+    .login-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2.8rem 2.5rem;
+      width: 100%;
+      max-width: 420px;
+      backdrop-filter: blur(20px);
+    }
+
+    .login-logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.4rem;
+      text-align: center;
+      margin-bottom: 0.3rem;
+    }
+    .login-logo span { color: var(--teal); }
+
+    .login-sub {
+      text-align: center;
+      color: var(--muted);
+      font-size: .85rem;
+      margin-bottom: 2rem;
+    }
+
+    .tab-row {
+      display: flex;
+      gap: .5rem;
+      margin-bottom: 1.8rem;
+      background: rgba(255,255,255,0.04);
+      border-radius: 10px;
+      padding: .3rem;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: .55rem;
+      border: none;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--muted);
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: .85rem;
+      cursor: pointer;
+      transition: background .2s, color .2s;
+    }
+    .tab-btn.active { background: var(--navy-light); color: var(--white); }
+
+    .form-group { margin-bottom: 1.1rem; }
+    .form-group label {
+      display: block;
+      font-size: .78rem;
+      color: var(--muted);
+      font-weight: 500;
+      margin-bottom: .4rem;
+      letter-spacing: .04em;
+    }
+    .form-group input {
+      width: 100%;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: .75rem 1rem;
+      color: var(--white);
+      font-family: 'DM Sans', sans-serif;
+      font-size: .9rem;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .form-group input:focus { border-color: var(--teal); }
+
+    .btn-full {
+      width: 100%;
+      background: var(--teal);
+      color: var(--navy);
+      border: none;
+      padding: .85rem;
+      border-radius: 8px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: .95rem;
+      cursor: pointer;
+      transition: background .2s, transform .15s;
+      margin-top: .3rem;
+    }
+    .btn-full:hover { background: var(--teal-dark); transform: translateY(-1px); }
+    .btn-full:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+
+    .auth-msg {
+      text-align: center;
+      font-size: .82rem;
+      margin-top: 1rem;
+      min-height: 1.2rem;
+      color: var(--danger);
+    }
+    .auth-msg.ok { color: var(--success); }
+
+    /* ── ADMIN SHELL ── */
+    #admin-shell { display: none; min-height: 100vh; }
+
+    .sidebar {
+      position: fixed;
+      left: 0; top: 0; bottom: 0;
+      width: 230px;
+      background: var(--navy-mid);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem 1rem;
+      z-index: 50;
+    }
+
+    .sidebar-logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.1rem;
+      padding: 0 .5rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 1.2rem;
+    }
+    .sidebar-logo span { color: var(--teal); }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      padding: .7rem .9rem;
+      border-radius: 8px;
+      color: var(--muted);
+      font-size: .88rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background .15s, color .15s;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+    }
+    .nav-item:hover { background: rgba(255,255,255,0.05); color: var(--white); }
+    .nav-item.active { background: rgba(0,201,167,0.12); color: var(--teal); }
+    .nav-item .nav-icon { font-size: 1.1rem; width: 20px; text-align: center; }
+
+    .sidebar-bottom {
+      margin-top: auto;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .main-content {
+      margin-left: 230px;
+      padding: 2rem 2.5rem;
+      min-height: 100vh;
+    }
+
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+    }
+
+    .page-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.5rem;
+    }
+
+    .user-chip {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: .4rem .9rem;
+      font-size: .82rem;
+      color: var(--muted);
+    }
+
+    .user-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--teal);
+    }
+
+    /* ── PAGES ── */
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.8rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .card-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+    }
+
+    /* ── STATUS TOGGLE ── */
+    .status-display {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: .6rem;
+      padding: .6rem 1.4rem;
+      border-radius: 30px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+    .status-badge.open { background: rgba(0,201,167,0.15); color: var(--teal); border: 1.5px solid rgba(0,201,167,0.3); }
+    .status-badge.closed { background: rgba(224,82,82,0.12); color: var(--danger); border: 1.5px solid rgba(224,82,82,0.25); }
+
+    .status-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      animation: blink 1.4s infinite;
+    }
+    .open .status-dot { background: var(--teal); }
+    .closed .status-dot { background: var(--danger); animation: none; }
+
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: .2; } }
+
+    .toggle-switch {
+      position: relative;
+      width: 56px; height: 28px;
+      cursor: pointer;
+    }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-track {
+      position: absolute;
+      inset: 0;
+      border-radius: 28px;
+      background: rgba(224,82,82,0.3);
+      transition: background .3s;
+    }
+    .toggle-switch input:checked + .toggle-track { background: rgba(0,201,167,0.4); }
+    .toggle-thumb {
+      position: absolute;
+      top: 3px; left: 3px;
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: var(--danger);
+      transition: transform .3s, background .3s;
+    }
+    .toggle-switch input:checked ~ .toggle-thumb { transform: translateX(28px); background: var(--teal); }
+
+    .status-msg-input {
+      width: 100%;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: .75rem 1rem;
+      color: var(--white);
+      font-family: 'DM Sans', sans-serif;
+      font-size: .9rem;
+      outline: none;
+      transition: border-color .2s;
+      margin-bottom: 1rem;
+    }
+    .status-msg-input:focus { border-color: var(--teal); }
+
+    .btn-save {
+      background: var(--teal);
+      color: var(--navy);
+      border: none;
+      padding: .65rem 1.6rem;
+      border-radius: 8px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: .88rem;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .btn-save:hover { background: var(--teal-dark); }
+
+    /* ── POSTS ── */
+    .posts-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: .8rem;
+    }
+
+    .filter-tabs {
+      display: flex;
+      gap: .4rem;
+    }
+
+    .filter-tab {
+      padding: .4rem .9rem;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      font-size: .8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .filter-tab.active { background: rgba(0,201,167,0.12); border-color: var(--teal); color: var(--teal); }
+
+    .btn-new {
+      background: var(--teal);
+      color: var(--navy);
+      border: none;
+      padding: .55rem 1.3rem;
+      border-radius: 8px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: .85rem;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .btn-new:hover { background: var(--teal-dark); }
+
+    /* ── POST FORM ── */
+    .post-form-card {
+      background: var(--card);
+      border: 1px solid rgba(0,201,167,0.2);
+      border-radius: 14px;
+      padding: 1.8rem;
+      margin-bottom: 1.5rem;
+      display: none;
+    }
+    .post-form-card.visible { display: block; }
+
+    .post-form-card h3 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+    .pf-group { margin-bottom: 1rem; }
+    .pf-group label {
+      display: block;
+      font-size: .78rem;
+      color: var(--muted);
+      margin-bottom: .35rem;
+      letter-spacing: .04em;
+    }
+    .pf-group input,
+    .pf-group select,
+    .pf-group textarea {
+      width: 100%;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: .7rem .9rem;
+      color: var(--white);
+      font-family: 'DM Sans', sans-serif;
+      font-size: .88rem;
+      outline: none;
+      transition: border-color .2s;
+      resize: vertical;
+    }
+    .pf-group input:focus,
+    .pf-group select:focus,
+    .pf-group textarea:focus { border-color: var(--teal); }
+    .pf-group select option { background: var(--navy-mid); }
+
+    .form-actions { display: flex; gap: .8rem; margin-top: .5rem; }
+
+    .btn-cancel {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: .65rem 1.4rem;
+      border-radius: 8px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: .88rem;
+      cursor: pointer;
+      transition: border-color .2s, color .2s;
+    }
+    .btn-cancel:hover { border-color: var(--muted); color: var(--white); }
+
+    /* ── POST LIST ── */
+    .posts-list { display: flex; flex-direction: column; gap: .9rem; }
+
+    .post-item {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.2rem 1.4rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      transition: border-color .2s;
+    }
+    .post-item:hover { border-color: rgba(0,201,167,0.2); }
+
+    .post-type-badge {
+      padding: .25rem .7rem;
+      border-radius: 6px;
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      flex-shrink: 0;
+      margin-top: .1rem;
+    }
+    .post-type-badge.blog { background: rgba(0,201,167,0.12); color: var(--teal); }
+    .post-type-badge.ad { background: rgba(255,107,53,0.12); color: var(--accent); }
+    .post-type-badge.announcement { background: rgba(255,200,0,0.12); color: #ffd000; }
+
+    .post-meta { flex: 1; }
+    .post-meta h4 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: .95rem;
+      margin-bottom: .3rem;
+    }
+    .post-meta p {
+      color: var(--muted);
+      font-size: .82rem;
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .post-date {
+      font-size: .75rem;
+      color: var(--muted);
+      margin-top: .4rem;
+    }
+
+    .post-actions { display: flex; gap: .5rem; align-items: center; flex-shrink: 0; }
+
+    .pub-toggle {
+      padding: .3rem .7rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: transparent;
+      font-size: .75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .15s;
+      color: var(--muted);
+    }
+    .pub-toggle.published { background: rgba(0,201,167,0.1); border-color: rgba(0,201,167,0.3); color: var(--teal); }
+
+    .btn-del {
+      padding: .3rem .7rem;
+      border-radius: 6px;
+      border: 1px solid rgba(224,82,82,0.2);
+      background: transparent;
+      color: var(--danger);
+      font-size: .75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .btn-del:hover { background: rgba(224,82,82,0.1); }
+
+    /* ── DASHBOARD STATS ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.4rem;
+    }
+
+    .stat-card .sc-label {
+      font-size: .75rem;
+      color: var(--muted);
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      margin-bottom: .5rem;
+    }
+
+    .stat-card .sc-val {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 2rem;
+      line-height: 1;
+    }
+
+    .stat-card .sc-sub {
+      font-size: .78rem;
+      color: var(--muted);
+      margin-top: .3rem;
+    }
+
+    /* ── TOAST ── */
+    #admin-toast {
+      position: fixed;
+      bottom: 2rem; right: 2rem;
+      padding: .85rem 1.4rem;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: .88rem;
+      z-index: 999;
+      transform: translateY(80px);
+      opacity: 0;
+      transition: all .4s cubic-bezier(.34,1.56,.64,1);
+      pointer-events: none;
+    }
+    #admin-toast.show { transform: translateY(0); opacity: 1; }
+    #admin-toast.success { background: var(--teal); color: var(--navy); }
+    #admin-toast.error { background: var(--danger); color: #fff; }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--muted);
+    }
+    .empty-state .es-icon { font-size: 2.5rem; margin-bottom: .8rem; }
+    .empty-state p { font-size: .9rem; }
+
+    /* ── LOADING ── */
+    .loading-line {
+      height: 60px;
+      background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.07) 50%, rgba(255,255,255,0.03) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 10px;
+      margin-bottom: .8rem;
+    }
+    @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+
+    @media (max-width: 768px) {
+      .sidebar { width: 60px; }
+      .sidebar-logo, .nav-item span { display: none; }
+      .main-content { margin-left: 60px; padding: 1.5rem; }
+      .stats-row { grid-template-columns: 1fr 1fr; }
+      .form-row-2 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══ -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">Esmer <span>Cyber</span> Admin</div>
+    <div class="login-sub">Manage your shop from here</div>
+
+    <div class="tab-row">
+      <button class="tab-btn active" onclick="switchTab('login')">Sign In</button>
+      <button class="tab-btn" onclick="switchTab('register')">Register</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="tab-login">
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="l-email" placeholder="admin@esmercyber.co.ke"/>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="l-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/>
+      </div>
+      <button class="btn-full" id="login-btn" onclick="doLogin()">Sign In →</button>
+    </div>
+
+    <!-- REGISTER -->
+    <div id="tab-register" style="display:none">
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="r-email" placeholder="admin@esmercyber.co.ke"/>
+      </div>
+      <div class="form-group">
+        <label>Password (min 6 chars)</label>
+        <input type="password" id="r-pass" placeholder="Choose a strong password"/>
+      </div>
+      <div class="form-group">
+        <label>Confirm Password</label>
+        <input type="password" id="r-pass2" placeholder="Repeat password" onkeydown="if(event.key==='Enter')doRegister()"/>
+      </div>
+      <button class="btn-full" id="reg-btn" onclick="doRegister()">Create Account →</button>
+    </div>
+
+    <div class="auth-msg" id="auth-msg"></div>
+  </div>
+</div>
+
+<!-- ══ ADMIN SHELL ══ -->
+<div id="admin-shell">
+
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <div class="sidebar-logo">Esmer <span>Cyber</span></div>
+
+    <button class="nav-item active" onclick="showPage('dashboard')">
+      <span class="nav-icon">📊</span>
+      <span>Dashboard</span>
+    </button>
+    <button class="nav-item" onclick="showPage('status')">
+      <span class="nav-icon">🟢</span>
+      <span>Shop Status</span>
+    </button>
+    <button class="nav-item" onclick="showPage('posts')">
+      <span class="nav-icon">📝</span>
+      <span>Posts & Ads</span>
+    </button>
+
+    <div class="sidebar-bottom">
+      <button class="nav-item" onclick="doLogout()">
+        <span class="nav-icon">🚪</span>
+        <span>Sign Out</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <div class="main-content">
+    <div class="top-bar">
+      <div class="page-title" id="page-title">Dashboard</div>
+      <div class="user-chip">
+        <div class="user-dot"></div>
+        <span id="user-email-display">admin</span>
+      </div>
+    </div>
+
+    <!-- ── DASHBOARD PAGE ── -->
+    <div class="page active" id="page-dashboard">
+      <div class="stats-row" id="stats-row">
+        <div class="stat-card">
+          <div class="sc-label">Shop Status</div>
+          <div class="sc-val" id="stat-status">—</div>
+          <div class="sc-sub">Current state</div>
+        </div>
+        <div class="stat-card">
+          <div class="sc-label">Total Posts</div>
+          <div class="sc-val" id="stat-posts">—</div>
+          <div class="sc-sub">All time</div>
+        </div>
+        <div class="stat-card">
+          <div class="sc-label">Published</div>
+          <div class="sc-val" id="stat-pub">—</div>
+          <div class="sc-sub">Live on site</div>
+        </div>
+        <div class="stat-card">
+          <div class="sc-label">Ads Active</div>
+          <div class="sc-val" id="stat-ads">—</div>
+          <div class="sc-sub">Running now</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📰 Recent Posts</div>
+        <div id="dash-posts-list"><div class="loading-line"></div><div class="loading-line"></div></div>
+      </div>
+    </div>
+
+    <!-- ── STATUS PAGE ── -->
+    <div class="page" id="page-status">
+      <div class="card">
+        <div class="card-title">🟢 Shop Open / Closed</div>
+        <div class="status-display">
+          <div class="status-badge open" id="big-status-badge">
+            <div class="status-dot"></div>
+            <span id="big-status-text">OPEN</span>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="status-toggle" onchange="saveStatus()">
+            <div class="toggle-track"></div>
+            <div class="toggle-thumb"></div>
+          </label>
+          <span style="color:var(--muted);font-size:.85rem">Toggle to open/close</span>
+        </div>
+
+        <div class="pf-group">
+          <label>Status Message (shown on website)</label>
+          <input class="status-msg-input" type="text" id="status-msg" placeholder="e.g. Open today until 8PM! Come visit us."/>
+        </div>
+        <button class="btn-save" onclick="saveStatus()">Save Status</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">⏰ Opening Hours Note</div>
+        <div class="pf-group">
+          <label>Special Hours / Holiday Notice</label>
+          <input class="status-msg-input" type="text" id="hours-note" placeholder="e.g. Closed on 25th Dec — Merry Christmas!"/>
+        </div>
+        <button class="btn-save" onclick="saveHoursNote()">Save Notice</button>
+      </div>
+    </div>
+
+    <!-- ── POSTS PAGE ── -->
+    <div class="page" id="page-posts">
+      <div class="posts-toolbar">
+        <div class="filter-tabs">
+          <button class="filter-tab active" onclick="filterPosts('all', this)">All</button>
+          <button class="filter-tab" onclick="filterPosts('blog', this)">Blog</button>
+          <button class="filter-tab" onclick="filterPosts('ad', this)">Ads</button>
+          <button class="filter-tab" onclick="filterPosts('announcement', this)">Announcements</button>
+        </div>
+        <button class="btn-new" onclick="togglePostForm(true)">+ New Post</button>
+      </div>
+
+      <!-- New Post Form -->
+      <div class="post-form-card" id="post-form-card">
+        <h3 id="form-title">✍️ New Post</h3>
+        <input type="hidden" id="edit-id"/>
+        <div class="form-row-2">
+          <div class="pf-group">
+            <label>Title</label>
+            <input type="text" id="pf-title" placeholder="Post title…"/>
+          </div>
+          <div class="pf-group">
+            <label>Type</label>
+            <select id="pf-type">
+              <option value="blog">📰 Blog Post</option>
+              <option value="ad">📢 Ad / Promotion</option>
+              <option value="announcement">📣 Announcement</option>
+            </select>
+          </div>
+        </div>
+        <div class="pf-group">
+          <label>Content</label>
+          <textarea id="pf-body" rows="5" placeholder="Write your content here…"></textarea>
+        </div>
+        <div class="form-row-2">
+          <div class="pf-group">
+            <label>Image URL (optional)</label>
+            <input type="url" id="pf-image" placeholder="https://…"/>
+          </div>
+          <div class="pf-group">
+            <label>Publish immediately?</label>
+            <select id="pf-published">
+              <option value="true">✅ Yes — publish now</option>
+              <option value="false">📁 No — save as draft</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn-save" onclick="savePost()">Save Post</button>
+          <button class="btn-cancel" onclick="togglePostForm(false)">Cancel</button>
+        </div>
+      </div>
+
+      <!-- Posts List -->
+      <div class="posts-list" id="posts-list">
+        <div class="loading-line"></div>
+        <div class="loading-line"></div>
+        <div class="loading-line"></div>
+      </div>
+    </div>
+
+  </div><!-- /main-content -->
+</div><!-- /admin-shell -->
+
+<div id="admin-toast"></div>
+
+<script>
+// ── SUPABASE INIT ──
+const SUPA_URL = 'https://avfnlkygxrfbjhvfoxog.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF2Zm5sa3lneHJmYmpodmZveG9nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MzM4MjYsImV4cCI6MjA5NzMwOTgyNn0.QgzTKoDUWw5iFafdE4f8WTnY51m6oyw-0uLC4eJyvyY';
+const { createClient } = supabase;
+const sb = createClient(SUPA_URL, SUPA_KEY);
+
+let currentUser = null;
+let allPosts = [];
+let currentFilter = 'all';
+
+// ── AUTH ──
+async function initAuth() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session?.user) enterAdmin(session.user);
+}
+
+function switchTab(tab) {
+  document.getElementById('tab-login').style.display = tab === 'login' ? 'block' : 'none';
+  document.getElementById('tab-register').style.display = tab === 'register' ? 'block' : 'none';
+  document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', (i === 0) === (tab === 'login')));
+  document.getElementById('auth-msg').textContent = '';
+}
+
+async function doLogin() {
+  const email = document.getElementById('l-email').value.trim();
+  const pass = document.getElementById('l-pass').value;
+  const btn = document.getElementById('login-btn');
+  if (!email || !pass) return showAuthMsg('Please fill in all fields.');
+  btn.disabled = true; btn.textContent = 'Signing in…';
+  const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+  btn.disabled = false; btn.textContent = 'Sign In →';
+  if (error) return showAuthMsg(error.message);
+  enterAdmin(data.user);
+}
+
+async function doRegister() {
+  const email = document.getElementById('r-email').value.trim();
+  const pass = document.getElementById('r-pass').value;
+  const pass2 = document.getElementById('r-pass2').value;
+  const btn = document.getElementById('reg-btn');
+  if (!email || !pass) return showAuthMsg('Please fill in all fields.');
+  if (pass !== pass2) return showAuthMsg('Passwords do not match.');
+  if (pass.length < 6) return showAuthMsg('Password must be at least 6 characters.');
+  btn.disabled = true; btn.textContent = 'Creating account…';
+  const { data, error } = await sb.auth.signUp({ email, password: pass });
+  btn.disabled = false; btn.textContent = 'Create Account →';
+  if (error) return showAuthMsg(error.message);
+  showAuthMsg('Account created! Check your email to confirm, then sign in.', true);
+}
+
+async function doLogout() {
+  await sb.auth.signOut();
+  currentUser = null;
+  document.getElementById('admin-shell').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+}
+
+function showAuthMsg(msg, ok = false) {
+  const el = document.getElementById('auth-msg');
+  el.textContent = msg;
+  el.className = 'auth-msg' + (ok ? ' ok' : '');
+}
+
+function enterAdmin(user) {
+  currentUser = user;
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('admin-shell').style.display = 'block';
+  document.getElementById('user-email-display').textContent = user.email.split('@')[0];
+  loadAll();
+}
+
+// ── NAVIGATION ──
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.querySelectorAll('.nav-item')[['dashboard','status','posts'].indexOf(name)].classList.add('active');
+  const titles = { dashboard: 'Dashboard', status: 'Shop Status', posts: 'Posts & Ads' };
+  document.getElementById('page-title').textContent = titles[name];
+}
+
+// ── LOAD ALL ──
+async function loadAll() {
+  await Promise.all([loadStatus(), loadPosts()]);
+  updateDashboard();
+}
+
+// ── STATUS ──
+async function loadStatus() {
+  const { data } = await sb.from('shop_status').select('*').eq('id', 1).single();
+  if (!data) return;
+  const isOpen = data.is_open;
+  document.getElementById('status-toggle').checked = isOpen;
+  document.getElementById('status-msg').value = data.message || '';
+  document.getElementById('hours-note').value = data.hours_note || '';
+  updateStatusBadge(isOpen);
+  document.getElementById('stat-status').textContent = isOpen ? 'Open' : 'Closed';
+  document.getElementById('stat-status').style.color = isOpen ? 'var(--teal)' : 'var(--danger)';
+}
+
+function updateStatusBadge(isOpen) {
+  const badge = document.getElementById('big-status-badge');
+  badge.className = 'status-badge ' + (isOpen ? 'open' : 'closed');
+  document.getElementById('big-status-text').textContent = isOpen ? 'OPEN' : 'CLOSED';
+}
+
+async function saveStatus() {
+  const isOpen = document.getElementById('status-toggle').checked;
+  const msg = document.getElementById('status-msg').value;
+  updateStatusBadge(isOpen);
+  const { error } = await sb.from('shop_status').upsert({
+    id: 1, is_open: isOpen, message: msg,
+    updated_at: new Date().toISOString()
+  });
+  if (error) return toast('Failed to save status', 'error');
+  toast('Shop status saved ✓', 'success');
+  document.getElementById('stat-status').textContent = isOpen ? 'Open' : 'Closed';
+  document.getElementById('stat-status').style.color = isOpen ? 'var(--teal)' : 'var(--danger)';
+}
+
+async function saveHoursNote() {
+  const note = document.getElementById('hours-note').value;
+  const { error } = await sb.from('shop_status').upsert({ id: 1, hours_note: note });
+  if (error) return toast('Failed to save notice', 'error');
+  toast('Notice saved ✓', 'success');
+}
+
+// ── POSTS ──
+async function loadPosts() {
+  const { data, error } = await sb.from('posts').select('*').order('created_at', { ascending: false });
+  if (error) { toast('Error loading posts', 'error'); return; }
+  allPosts = data || [];
+  renderPosts(allPosts);
+  renderDashPosts(allPosts.slice(0, 5));
+}
+
+function filterPosts(type, btn) {
+  currentFilter = type;
+  document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const filtered = type === 'all' ? allPosts : allPosts.filter(p => p.type === type);
+  renderPosts(filtered);
+}
+
+function renderPosts(posts) {
+  const el = document.getElementById('posts-list');
+  if (!posts.length) {
+    el.innerHTML = `<div class="empty-state"><div class="es-icon">📭</div><p>No posts yet. Create your first one!</p></div>`;
+    return;
+  }
+  el.innerHTML = posts.map(p => `
+    <div class="post-item">
+      <span class="post-type-badge ${p.type}">${p.type}</span>
+      <div class="post-meta">
+        <h4>${esc(p.title)}</h4>
+        <p>${esc(p.body)}</p>
+        <div class="post-date">${new Date(p.created_at).toLocaleDateString('en-KE', { day:'numeric', month:'short', year:'numeric' })}</div>
+      </div>
+      <div class="post-actions">
+        <button class="pub-toggle ${p.is_published ? 'published' : ''}" onclick="togglePublish('${p.id}', ${p.is_published})">
+          ${p.is_published ? 'Live' : 'Draft'}
+        </button>
+        <button class="btn-del" onclick="editPost('${p.id}')">✏️</button>
+        <button class="btn-del" onclick="deletePost('${p.id}')">Delete</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderDashPosts(posts) {
+  const el = document.getElementById('dash-posts-list');
+  if (!posts.length) {
+    el.innerHTML = `<div class="empty-state"><div class="es-icon">📭</div><p>No posts yet.</p></div>`;
+    return;
+  }
+  el.innerHTML = posts.map(p => `
+    <div class="post-item">
+      <span class="post-type-badge ${p.type}">${p.type}</span>
+      <div class="post-meta">
+        <h4>${esc(p.title)}</h4>
+        <p>${esc(p.body)}</p>
+      </div>
+      <div class="post-actions">
+        <span style="font-size:.78rem;color:${p.is_published ? 'var(--teal)' : 'var(--muted)'}">
+          ${p.is_published ? '● Live' : '○ Draft'}
+        </span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function updateDashboard() {
+  document.getElementById('stat-posts').textContent = allPosts.length;
+  document.getElementById('stat-pub').textContent = allPosts.filter(p => p.is_published).length;
+  document.getElementById('stat-ads').textContent = allPosts.filter(p => p.type === 'ad' && p.is_published).length;
+}
+
+function togglePostForm(show) {
+  const form = document.getElementById('post-form-card');
+  form.classList.toggle('visible', show);
+  if (!show) {
+    document.getElementById('edit-id').value = '';
+    document.getElementById('pf-title').value = '';
+    document.getElementById('pf-body').value = '';
+    document.getElementById('pf-image').value = '';
+    document.getElementById('pf-type').value = 'blog';
+    document.getElementById('pf-published').value = 'true';
+    document.getElementById('form-title').textContent = '✍️ New Post';
+  }
+}
+
+function editPost(id) {
+  const p = allPosts.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('edit-id').value = p.id;
+  document.getElementById('pf-title').value = p.title;
+  document.getElementById('pf-body').value = p.body;
+  document.getElementById('pf-image').value = p.image_url || '';
+  document.getElementById('pf-type').value = p.type;
+  document.getElementById('pf-published').value = String(p.is_published);
+  document.getElementById('form-title').textContent = '✏️ Edit Post';
+  togglePostForm(true);
+  document.getElementById('post-form-card').scrollIntoView({ behavior: 'smooth' });
+}
+
+async function savePost() {
+  const title = document.getElementById('pf-title').value.trim();
+  const body = document.getElementById('pf-body').value.trim();
+  if (!title || !body) return toast('Title and content are required', 'error');
+
+  const id = document.getElementById('edit-id').value;
+  const payload = {
+    title,
+    body,
+    type: document.getElementById('pf-type').value,
+    image_url: document.getElementById('pf-image').value.trim() || null,
+    is_published: document.getElementById('pf-published').value === 'true',
+    user_id: currentUser.id
+  };
+
+  let error;
+  if (id) {
+    ({ error } = await sb.from('posts').update(payload).eq('id', id));
+  } else {
+    ({ error } = await sb.from('posts').insert(payload));
+  }
+  if (error) return toast('Failed to save: ' + error.message, 'error');
+  toast(id ? 'Post updated ✓' : 'Post created ✓', 'success');
+  togglePostForm(false);
+  loadPosts();
+}
+
+async function togglePublish(id, current) {
+  const { error } = await sb.from('posts').update({ is_published: !current }).eq('id', id);
+  if (error) return toast('Failed to update', 'error');
+  toast(!current ? 'Post published ✓' : 'Moved to draft', 'success');
+  loadPosts();
+}
+
+async function deletePost(id) {
+  if (!confirm('Delete this post? This cannot be undone.')) return;
+  const { error } = await sb.from('posts').delete().eq('id', id);
+  if (error) return toast('Failed to delete', 'error');
+  toast('Post deleted', 'success');
+  loadPosts();
+}
+
+// ── UTILS ──
+function esc(str) {
+  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+let toastTimer;
+function toast(msg, type = 'success') {
+  const el = document.getElementById('admin-toast');
+  el.textContent = (type === 'success' ? '✓ ' : '✕ ') + msg;
+  el.className = `show ${type}`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+// ── INIT ──
+initAuth();
+</script>
+</body>
+</html>
