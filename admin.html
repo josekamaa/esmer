@@ -843,6 +843,59 @@
       background: rgba(224, 82, 82, 0.1);
     }
 
+    /* ── MESSAGES ── */
+    .message-item {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem 1.2rem;
+      margin-bottom: 0.8rem;
+      transition: border-color 0.2s;
+    }
+    .message-item:hover {
+      border-color: rgba(0, 201, 167, 0.2);
+    }
+    .message-header {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      align-items: center;
+      margin-bottom: 0.4rem;
+    }
+    .message-header strong {
+      color: var(--white);
+      font-size: 0.95rem;
+    }
+    .message-phone {
+      color: var(--teal);
+      font-size: 0.85rem;
+    }
+    .message-service {
+      background: rgba(255, 255, 255, 0.06);
+      padding: 0.1rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+    .message-date {
+      margin-left: auto;
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+    .message-body {
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.5;
+      padding-top: 0.4rem;
+      border-top: 1px solid var(--border);
+      margin-top: 0.4rem;
+    }
+    .message-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 0.6rem;
+    }
+
     /* ── TOAST ── */
     #admin-toast {
       position: fixed;
@@ -1012,6 +1065,10 @@
         <span class="nav-icon">📝</span>
         <span>Posts & Ads</span>
       </button>
+      <button class="nav-item" onclick="showPage('messages')">
+        <span class="nav-icon">✉️</span>
+        <span>Messages</span>
+      </button>
 
       <div class="sidebar-bottom">
         <button class="nav-item" onclick="doLogout()">
@@ -1172,6 +1229,17 @@
         </div>
       </div>
 
+      <!-- ── MESSAGES PAGE ── -->
+      <div class="page" id="page-messages">
+        <div class="card">
+          <div class="card-title">✉️ Contact Messages</div>
+          <div id="messages-list">
+            <div class="loading-line"></div>
+            <div class="loading-line"></div>
+          </div>
+        </div>
+      </div>
+
     </div><!-- /main-content -->
   </div><!-- /admin-shell -->
 
@@ -1288,15 +1356,15 @@
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
       document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
       document.getElementById('page-' + name).classList.add('active');
-      const navMap = ['dashboard', 'status', 'posts'];
+      const navMap = ['dashboard', 'status', 'posts', 'messages'];
       document.querySelectorAll('.nav-item')[navMap.indexOf(name)].classList.add('active');
-      const titles = { dashboard: 'Dashboard', status: 'Shop Status', posts: 'Posts & Ads' };
+      const titles = { dashboard: 'Dashboard', status: 'Shop Status', posts: 'Posts & Ads', messages: 'Messages' };
       document.getElementById('page-title').textContent = titles[name];
     }
 
     // ── LOAD ALL ──
     async function loadAll() {
-      await Promise.all([loadStatus(), loadPosts()]);
+      await Promise.all([loadStatus(), loadPosts(), loadMessages()]);
       updateDashboard();
       updateChart();
     }
@@ -1348,7 +1416,7 @@
       const { data, error } = await sb
         .from('posts')
         .select('*')
-        .eq('user_id', currentUser.id) // Only fetch current user's posts
+        .eq('user_id', currentUser.id)
         .order('created_at', { ascending: false });
       if (error) { toast('Error loading posts', 'error'); return; }
       allPosts = data || [];
@@ -1424,14 +1492,13 @@
       const ctx = document.getElementById('postsChart').getContext('2d');
       if (chartInstance) chartInstance.destroy();
 
-      // Group posts by date (last 7 days)
       const days = [];
       const counts = [];
       for (let i = 6; i >= 0; i--) {
         const d = new Date();
         d.setDate(d.getDate() - i);
         const key = d.toISOString().split('T')[0];
-        days.push(key.slice(5)); // MM-DD
+        days.push(key.slice(5));
         const count = allPosts.filter(p => p.created_at && p.created_at.startsWith(key)).length;
         counts.push(count);
       }
@@ -1562,9 +1629,49 @@
       loadPosts();
     }
 
+    // ── MESSAGES ──
+    async function loadMessages() {
+      const { data, error } = await sb
+        .from('messages')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) { toast('Error loading messages', 'error'); return; }
+      renderMessages(data || []);
+    }
+
+    function renderMessages(messages) {
+      const el = document.getElementById('messages-list');
+      if (!messages.length) {
+        el.innerHTML = `<div class="empty-state"><div class="es-icon">📭</div><p>No messages yet.</p></div>`;
+        return;
+      }
+      el.innerHTML = messages.map(m => `
+        <div class="message-item">
+          <div class="message-header">
+            <strong>${esc(m.name)}</strong>
+            <span class="message-phone">📞 ${esc(m.phone)}</span>
+            <span class="message-service">${esc(m.service)}</span>
+            <span class="message-date">${new Date(m.created_at).toLocaleString('en-KE', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' })}</span>
+          </div>
+          <div class="message-body">${esc(m.message)}</div>
+          <div class="message-actions">
+            <button class="btn-del" onclick="deleteMessage('${m.id}')">Delete</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function deleteMessage(id) {
+      if (!confirm('Delete this message?')) return;
+      const { error } = await sb.from('messages').delete().eq('id', id);
+      if (error) return toast('Failed to delete', 'error');
+      toast('Message deleted', 'success');
+      loadMessages();
+    }
+
     // ── REALTIME SUBSCRIPTIONS ──
     function subscribeToRealtime() {
-      // Listen for status changes
+      // Status updates
       sb.channel('status-updates')
         .on(
           'postgres_changes', {
@@ -1577,7 +1684,7 @@
         )
         .subscribe();
 
-      // Listen for post changes (so dashboard updates live if another admin edits)
+      // Post updates
       sb.channel('post-updates')
         .on(
           'postgres_changes', {
@@ -1587,6 +1694,18 @@
             filter: `user_id=eq.${currentUser.id}`
           },
           () => loadPosts()
+        )
+        .subscribe();
+
+      // Message updates (new messages arrive instantly)
+      sb.channel('message-updates')
+        .on(
+          'postgres_changes', {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'messages'
+          },
+          () => loadMessages()
         )
         .subscribe();
     }
