@@ -787,9 +787,103 @@
       transition: opacity .7s ease, transform .7s ease;
     }
     .reveal.visible { opacity: 1; transform: none; }
+
+    /* ── LIVE STATUS BAR ── */
+    #status-bar {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 200;
+      padding: .5rem 5%;
+      font-size: .82rem;
+      font-weight: 600;
+      text-align: center;
+      letter-spacing: .02em;
+      transition: background .4s;
+    }
+    #status-bar.open-bar  { background: rgba(0,201,167,0.92); color: #0a1628; display: block; }
+    #status-bar.closed-bar { background: rgba(224,82,82,0.92); color: #fff; display: block; }
+    body.has-status-bar nav { top: 36px; }
+    body.has-status-bar #hero { padding-top: 10rem; }
+
+    /* ── POSTS / BLOG SECTION ── */
+    #news { background: var(--navy); }
+
+    .news-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.4rem;
+    }
+
+    .news-card {
+      background: var(--card-bg);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 14px;
+      overflow: hidden;
+      transition: transform .2s, border-color .2s;
+    }
+    .news-card:hover { transform: translateY(-4px); border-color: rgba(0,201,167,0.25); }
+
+    .news-card-img {
+      width: 100%; height: 160px;
+      object-fit: cover;
+      display: block;
+      background: var(--navy-light);
+    }
+
+    .news-card-img-placeholder {
+      width: 100%; height: 160px;
+      background: linear-gradient(135deg, var(--navy-light), var(--navy-mid));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.5rem;
+    }
+
+    .news-card-body { padding: 1.4rem; }
+
+    .news-type-badge {
+      display: inline-block;
+      padding: .2rem .6rem;
+      border-radius: 5px;
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      margin-bottom: .7rem;
+    }
+    .news-type-badge.blog { background: rgba(0,201,167,0.12); color: var(--teal); }
+    .news-type-badge.ad { background: rgba(255,107,53,0.12); color: var(--accent); }
+    .news-type-badge.announcement { background: rgba(255,200,0,0.12); color: #ffd000; }
+
+    .news-card-body h3 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: .5rem;
+      line-height: 1.3;
+    }
+
+    .news-card-body p {
+      color: var(--muted);
+      font-size: .85rem;
+      line-height: 1.6;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .news-date {
+      font-size: .75rem;
+      color: var(--muted);
+      margin-top: .8rem;
+    }
   </style>
 </head>
 <body>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- LIVE STATUS BAR -->
+<div id="status-bar"></div>
 
 <!-- NAV -->
 <nav>
@@ -808,7 +902,7 @@
   <div class="hero-glow"></div>
   <div class="hero-glow-2"></div>
   <div class="hero-inner">
-    <div class="hero-badge">Open Now — Your Digital Hub</div>
+    <div class="hero-badge" id="hero-status-badge">Your Digital Hub</div>
     <h1>
       Your All-In-One<br>
       <span class="highlight">Cyber Solutions</span><br>
@@ -1109,6 +1203,16 @@
   </div>
 </section>
 
+<!-- NEWS / POSTS (live from admin) -->
+<section id="news" style="display:none">
+  <div style="text-align:center" class="reveal">
+    <div class="section-tag">Latest from Us</div>
+    <h2>News & Updates</h2>
+    <p class="section-sub" style="margin:0 auto 3rem">Offers, announcements, and updates from Esmer Cyber Solutions.</p>
+  </div>
+  <div class="news-grid" id="news-grid"></div>
+</section>
+
 <!-- FOOTER -->
 <footer>
   <div class="footer-inner">
@@ -1128,7 +1232,68 @@
 <div id="toast">✅ Message sent! We'll be in touch shortly.</div>
 
 <script>
-  // Scroll reveal
+  // ── SUPABASE ──
+  const SUPA_URL = 'https://avfnlkygxrfbjhvfoxog.supabase.co';
+  const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF2Zm5sa3lneHJmYmpodmZveG9nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MzM4MjYsImV4cCI6MjA5NzMwOTgyNn0.QgzTKoDUWw5iFafdE4f8WTnY51m6oyw-0uLC4eJyvyY';
+  const { createClient } = supabase;
+  const sb = createClient(SUPA_URL, SUPA_KEY);
+
+  // ── LOAD SHOP STATUS ──
+  async function loadShopStatus() {
+    try {
+      const { data } = await sb.from('shop_status').select('*').eq('id', 1).single();
+      if (!data) return;
+      const bar = document.getElementById('status-bar');
+      const badge = document.getElementById('hero-status-badge');
+      if (data.is_open) {
+        bar.className = 'open-bar';
+        bar.textContent = '🟢 We are OPEN right now' + (data.message ? ' — ' + data.message : '');
+        badge.textContent = '🟢 Open Now — Your Digital Hub';
+      } else {
+        bar.className = 'closed-bar';
+        bar.textContent = '🔴 We are currently CLOSED' + (data.message ? ' — ' + data.message : '');
+        badge.textContent = '🔴 Currently Closed';
+      }
+      document.body.classList.add('has-status-bar');
+    } catch(e) { /* silently fail if table not yet created */ }
+  }
+
+  // ── LOAD POSTS ──
+  async function loadPosts() {
+    try {
+      const { data } = await sb.from('posts').select('*').eq('is_published', true).order('created_at', { ascending: false });
+      if (!data || !data.length) return;
+      const section = document.getElementById('news');
+      const grid = document.getElementById('news-grid');
+      const typeEmoji = { blog: '📰', ad: '📢', announcement: '📣' };
+      grid.innerHTML = data.map(p => `
+        <div class="news-card">
+          ${p.image_url
+            ? `<img class="news-card-img" src="${p.image_url}" alt="${esc(p.title)}" onerror="this.style.display='none'">`
+            : `<div class="news-card-img-placeholder">${typeEmoji[p.type] || '📄'}</div>`}
+          <div class="news-card-body">
+            <span class="news-type-badge ${p.type}">${p.type}</span>
+            <h3>${esc(p.title)}</h3>
+            <p>${esc(p.body)}</p>
+            <div class="news-date">${new Date(p.created_at).toLocaleDateString('en-KE', { day:'numeric', month:'long', year:'numeric' })}</div>
+          </div>
+        </div>
+      `).join('');
+      section.style.display = 'block';
+
+      // observe new cards for reveal
+      section.querySelectorAll('.news-card').forEach(el => {
+        el.classList.add('reveal');
+        observer.observe(el);
+      });
+    } catch(e) { /* silently fail */ }
+  }
+
+  function esc(str) {
+    return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // ── SCROLL REVEAL ──
   const reveals = document.querySelectorAll('.reveal');
   const observer = new IntersectionObserver((entries) => {
     entries.forEach((entry, i) => {
@@ -1140,7 +1305,7 @@
   }, { threshold: 0.12 });
   reveals.forEach(el => observer.observe(el));
 
-  // Form submit
+  // ── FORM SUBMIT ──
   function handleSubmit() {
     const name = document.getElementById('fname').value.trim();
     const phone = document.getElementById('fphone').value.trim();
@@ -1162,6 +1327,10 @@
   document.querySelectorAll('.service-card').forEach((card, i) => {
     card.style.transitionDelay = `${i * 60}ms`;
   });
+
+  // Init live data
+  loadShopStatus();
+  loadPosts();
 </script>
 </body>
 </html>
